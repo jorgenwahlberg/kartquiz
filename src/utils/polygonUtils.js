@@ -13,6 +13,12 @@ function convertToTurfFeature(polygonGeometry) {
   // If the first element of coordinates is an array of arrays, it's multi-ring
   if (coords.length > 1 && Array.isArray(coords[0][0]) && coords[0][0].length === 2) {
     // Multiple coordinate rings - union them together
+    console.log('[convertToTurfFeature] Multi-ring polygon detected with', coords.length, 'rings')
+    coords.forEach((ring, idx) => {
+      const sampleCoords = ring.slice(0, 3)
+      console.log(`  Ring ${idx + 1}: ${ring.length} coordinates, sample:`, sampleCoords)
+    })
+
     const polygons = coords.map(ring => turf.polygon([ring]))
 
     // Union all polygons together
@@ -23,9 +29,13 @@ function convertToTurfFeature(polygonGeometry) {
         result = unioned
       }
     }
+    console.log('[convertToTurfFeature] Multi-ring union result type:', result.geometry.type)
     return result
   } else {
     // Single polygon ring
+    const coordCount = coords[0] ? coords[0].length : 0
+    const sampleCoords = coords[0] ? coords[0].slice(0, 3) : []
+    console.log('[convertToTurfFeature] Single-ring polygon with', coordCount, 'coordinates, sample:', sampleCoords)
     return turf.polygon(coords)
   }
 }
@@ -43,11 +53,20 @@ export function unionPolygons(polygons) {
 
   if (polygons.length === 1) {
     console.log('[unionPolygons] Single polygon, returning as-is')
+    const area = turf.area(turf.polygon(polygons[0].coordinates)) / 1000000
+    console.log('[unionPolygons] Polygon area:', area.toFixed(2), 'km²')
     return [polygons[0]]
   }
 
   try {
     console.log('[unionPolygons] Unioning', polygons.length, 'polygons')
+
+    // Log input polygon details
+    polygons.forEach((poly, idx) => {
+      const coordCount = poly.coordinates[0] ? poly.coordinates[0].length : 0
+      const area = turf.area(turf.polygon(poly.coordinates)) / 1000000
+      console.log(`[unionPolygons] Input polygon ${idx + 1}: ${coordCount} coords, ${area.toFixed(2)} km²`)
+    })
 
     // Start with the first polygon
     let result = convertToTurfFeature(polygons[0])
@@ -62,7 +81,8 @@ export function unionPolygons(polygons) {
 
       if (unioned) {
         result = unioned
-        console.log('[unionPolygons] Union result type:', result.geometry.type)
+        const unionArea = turf.area(result) / 1000000
+        console.log('[unionPolygons] Union result type:', result.geometry.type, 'area:', unionArea.toFixed(2), 'km²')
       }
     }
 
@@ -72,14 +92,22 @@ export function unionPolygons(polygons) {
         type: 'Polygon',
         coordinates: result.geometry.coordinates
       }
-      console.log('[unionPolygons] Returning single polygon')
+      const finalArea = turf.area(result) / 1000000
+      const coordCount = result.geometry.coordinates[0].length
+      console.log('[unionPolygons] Returning single polygon:', coordCount, 'coords,', finalArea.toFixed(2), 'km²')
       return [poly]
     } else if (result.geometry.type === 'MultiPolygon') {
       const polys = result.geometry.coordinates.map(coords => ({
         type: 'Polygon',
         coordinates: coords
       }))
-      console.log('[unionPolygons] Returning', polys.length, 'polygons from MultiPolygon')
+      const totalArea = turf.area(result) / 1000000
+      console.log('[unionPolygons] Returning', polys.length, 'polygons from MultiPolygon, total area:', totalArea.toFixed(2), 'km²')
+      polys.forEach((poly, idx) => {
+        const polyArea = turf.area(turf.polygon(poly.coordinates)) / 1000000
+        const coordCount = poly.coordinates[0].length
+        console.log(`  Polygon ${idx + 1}: ${coordCount} coords, ${polyArea.toFixed(2)} km²`)
+      })
       return polys
     }
 
@@ -103,11 +131,22 @@ export function intersectPolygons(polygons) {
 
   if (polygons.length === 1) {
     console.log('[intersectPolygons] Single polygon, returning as-is')
+    const area = turf.area(turf.polygon(polygons[0].coordinates)) / 1000000
+    console.log('[intersectPolygons] Polygon area:', area.toFixed(2), 'km²')
     return [polygons[0]]
   }
 
   try {
     console.log('[intersectPolygons] Intersecting', polygons.length, 'polygons')
+
+    // Log input polygon details
+    polygons.forEach((poly, idx) => {
+      const coordCount = poly.coordinates[0] ? poly.coordinates[0].length : 0
+      const area = turf.area(turf.polygon(poly.coordinates)) / 1000000
+      const bounds = turf.bbox(turf.polygon(poly.coordinates))
+      console.log(`[intersectPolygons] Input polygon ${idx + 1}: ${coordCount} coords, ${area.toFixed(2)} km²`)
+      console.log(`  Bounds: [${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}] to [${bounds[2].toFixed(2)}, ${bounds[3].toFixed(2)}]`)
+    })
 
     // Start with the first polygon (may be a union of regions)
     let result = convertToTurfFeature(polygons[0])
@@ -121,12 +160,13 @@ export function intersectPolygons(polygons) {
       const intersection = turf.intersect(turf.featureCollection([result, nextPolygon]))
 
       if (!intersection) {
-        console.log('[intersectPolygons] No intersection found')
+        console.log('[intersectPolygons] No intersection found between current result and polygon', i+1)
         return []
       }
 
       result = intersection
-      console.log('[intersectPolygons] Intersection result type:', result.geometry.type)
+      const intersectArea = turf.area(result) / 1000000
+      console.log('[intersectPolygons] Intersection result type:', result.geometry.type, 'area:', intersectArea.toFixed(2), 'km²')
     }
 
     // Handle both Polygon and MultiPolygon results
@@ -135,14 +175,26 @@ export function intersectPolygons(polygons) {
         type: 'Polygon',
         coordinates: result.geometry.coordinates
       }
-      console.log('[intersectPolygons] Returning single polygon')
+      const finalArea = turf.area(result) / 1000000
+      const coordCount = result.geometry.coordinates[0].length
+      const bounds = turf.bbox(result)
+      console.log('[intersectPolygons] Returning single polygon:', coordCount, 'coords,', finalArea.toFixed(2), 'km²')
+      console.log(`[intersectPolygons] Final bounds: [${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}] to [${bounds[2].toFixed(2)}, ${bounds[3].toFixed(2)}]`)
       return [poly]
     } else if (result.geometry.type === 'MultiPolygon') {
       const polys = result.geometry.coordinates.map(coords => ({
         type: 'Polygon',
         coordinates: coords
       }))
-      console.log('[intersectPolygons] Returning', polys.length, 'polygons from MultiPolygon')
+      const totalArea = turf.area(result) / 1000000
+      console.log('[intersectPolygons] Returning', polys.length, 'polygons from MultiPolygon, total area:', totalArea.toFixed(2), 'km²')
+      polys.forEach((poly, idx) => {
+        const polyArea = turf.area(turf.polygon(poly.coordinates)) / 1000000
+        const coordCount = poly.coordinates[0].length
+        const bounds = turf.bbox(turf.polygon(poly.coordinates))
+        console.log(`  Polygon ${idx + 1}: ${coordCount} coords, ${polyArea.toFixed(2)} km²`)
+        console.log(`    Bounds: [${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}] to [${bounds[2].toFixed(2)}, ${bounds[3].toFixed(2)}]`)
+      })
       return polys
     }
 

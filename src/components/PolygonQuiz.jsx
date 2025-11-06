@@ -17,11 +17,31 @@ function PolygonQuiz({ quizData }) {
       console.log('=== Calculating geometries for', selectedAnswers.length, 'answers ===')
       console.log('Selected answers:', selectedAnswers.map(a => a.text))
 
+      // Log individual polygon areas before operations
+      console.log('Individual polygon areas:')
+      selectedAnswers.forEach((answer, idx) => {
+        const area = getPolygonArea(answer.polygon)
+        console.log(`  ${idx + 1}. ${answer.text}: ${area.toFixed(2)} km²`)
+      })
+
       const union = unionPolygons(polygons)
       const intersection = intersectPolygons(polygons)
 
       console.log('Union result:', union.length, 'polygon(s)')
       console.log('Intersection result:', intersection.length, 'polygon(s)')
+
+      // Calculate total areas
+      const unionArea = union.reduce((sum, poly) => sum + getPolygonArea(poly), 0)
+      const intersectionArea = intersection.reduce((sum, poly) => sum + getPolygonArea(poly), 0)
+
+      console.log('=== Area Summary ===')
+      console.log('Union total area:', unionArea.toFixed(2), 'km²')
+      console.log('Intersection total area:', intersectionArea.toFixed(2), 'km²')
+
+      if (unionArea > 0 && intersectionArea > 0) {
+        const reductionPercent = ((unionArea - intersectionArea) / unionArea * 100).toFixed(1)
+        console.log('Area reduction:', reductionPercent + '%', '(narrowed down by', reductionPercent + '%)')
+      }
 
       setUnionPolygonsState(union)
       setCurrentPolygons(intersection)
