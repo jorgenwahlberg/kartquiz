@@ -1,0 +1,148 @@
+{
+  "title": "Sverres Bursdagsquiz",
+  "description": "Svar på spørsmålene for å vite hva du får i bursdagsgave!",
+  "questions": [
+    {
+      "id": 1,
+      "question": "Favoritt transportmiddel",
+      "answers": [
+        {
+          "text": "Tog",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-10, 71], [50, 71], [50, 35], [-10, 35], [-10, 71]
+            ]]
+          }
+        },
+        {
+          "text": "Fly",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-10, 71], [50, 71], [50, 35], [-10, 35], [-10, 71]
+            ]]
+          }
+        },
+        {
+          "text": "Taubane",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [4, 62], [16, 62], [16, 45], [4, 45], [4, 62]
+            ]]
+          }
+        },
+        {
+          "text": "Snøscooter",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [
+              [[10, 71], [31, 71], [31, 65], [10, 65], [10, 71]],
+              [[1.5, 42], [3, 42], [3, 40.5], [1.5, 40.5], [1.5, 42]]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "question": "Hva liker du best å drikke?",
+      "answers": [
+        {
+          "text": "Hvitvin",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [5, 65], [18, 65], [18, 46], [5, 46], [5, 65]
+            ]]
+          }
+        },
+        {
+          "text": "Rødvin",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-10, 71], [18, 71], [18, 36], [-10, 36], [-10, 71]
+            ]]
+          }
+        },
+        {
+          "text": "Vodka",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [14, 71], [50, 71], [50, 49], [14, 49], [14, 71]
+            ]]
+          }
+        },
+        {
+          "text": "Grappa",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [6, 47], [19, 47], [19, 36], [6, 36], [6, 47]
+            ]]
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "question": "Favoritt språk?",
+      "answers": [
+        {
+          "text": "Tysk",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [6, 55], [17, 55], [17, 46], [6, 46], [6, 55]
+            ]]
+          }
+        },
+        {
+          "text": "Fransk",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [-5, 51], [8, 51], [8, 42], [-5, 42], [-5, 51]
+            ]]
+          }
+        },
+        {
+          "text": "Italiensk",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [6, 47], [19, 47], [19, 36], [6, 36], [6, 47]
+            ]]
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "question": "Merkelig katedral eller gamle ruiner?",
+      "answers": [
+        {
+          "text": "Merkelig katedral",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [1.5, 42], [3, 42], [3, 40.5], [1.5, 40.5], [1.5, 42]
+            ]]
+          }
+        },
+        {
+          "text": "Gamle ruiner",
+          "polygon": {
+            "type": "Polygon",
+            "coordinates": [[
+              [6, 47], [19, 47], [19, 36], [6, 36], [6, 47]
+            ]]
+          }
+        }
+      ]
+    }
+  ]
+}
