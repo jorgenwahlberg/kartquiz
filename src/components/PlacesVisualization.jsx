@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PlacesMap from './PlacesMap'
-import { fetchSheetData, calculateWeightedMean, createGradientBuffers } from '../utils/sheetUtils'
+import { fetchSheetData, createGradientBuffers } from '../utils/sheetUtils'
 import * as turf from '@turf/turf'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
 const SHEET_NAME = 'Resultater'
 const REFRESH_INTERVAL = 10000 // 10 seconds
+const GRADIENT_WIDTH = 250 // km - configurable gradient width
+const ANIMATION_DURATION = 5000 // ms - duration of change animation
 
 function PlacesVisualization() {
   const [places, setPlaces] = useState([])
-  const [weightedCenter, setWeightedCenter] = useState(null)
+  const previousPlacesRef = useRef([]) // Use ref to avoid closure issues
+  const [changedPlaces, setChangedPlaces] = useState([])
   const [convexHull, setConvexHull] = useState(null)
   const [gradientBuffers, setGradientBuffers] = useState([])
-  const [circleRadius, setCircleRadius] = useState(50) // km
-  const [gradientWidth, setGradientWidth] = useState(100) // km
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)
@@ -27,16 +28,69 @@ function PlacesVisualization() {
       const data = await fetchSheetData(SHEET_ID, SHEET_NAME)
 
       console.log('[PlacesVisualization] Loaded places:', data.length)
+      console.log('[PlacesVisualization] Previous places count:', previousPlacesRef.current.length)
+
+      // Detect changes between previous and current data
+      if (previousPlacesRef.current.length > 0) {
+        console.log('[PlacesVisualization] Checking for changes...')
+        const changes = []
+
+        data.forEach(currentPlace => {
+          const prevPlace = previousPlacesRef.current.find(p => p.name === currentPlace.name)
+
+          if (!prevPlace) {
+            // New place added
+            console.log('[PlacesVisualization] New place:', currentPlace.name)
+            changes.push({ ...currentPlace, changeType: 'new' })
+          } else if (prevPlace.score !== currentPlace.score) {
+            // Score changed
+            console.log('[PlacesVisualization] Score changed for', currentPlace.name,
+              'from', prevPlace.score, 'to', currentPlace.score)
+            changes.push({
+              ...currentPlace,
+              changeType: 'updated',
+              previousScore: prevPlace.score
+            })
+          } else {
+            // No change for this place
+            if (currentPlace.name === 'Oslo') {
+              console.log('[PlacesVisualization] Oslo unchanged - prev:', prevPlace.score, 'current:', currentPlace.score)
+            }
+          }
+        })
+
+        // Check for removed places
+        previousPlacesRef.current.forEach(prevPlace => {
+          if (!data.find(p => p.name === prevPlace.name)) {
+            console.log('[PlacesVisualization] Place removed:', prevPlace.name)
+            changes.push({ ...prevPlace, changeType: 'removed' })
+          }
+        })
+
+        if (changes.length > 0) {
+          console.log('[PlacesVisualization] ✨ Total changes detected:', changes.length)
+          console.log('[PlacesVisualization] Changes:', changes.map(c => `${c.name} (${c.changeType})`).join(', '))
+          setChangedPlaces(changes)
+
+          // Clear changed places after animation duration
+          setTimeout(() => {
+            console.log('[PlacesVisualization] Clearing changed places after animation')
+            setChangedPlaces([])
+          }, ANIMATION_DURATION)
+        } else {
+          console.log('[PlacesVisualization] No changes detected')
+        }
+      } else {
+        console.log('[PlacesVisualization] Skipping change detection - first load or no previous data')
+      }
+
+      // Store current data for next comparison
+      previousPlacesRef.current = data
       setPlaces(data)
       setLastUpdate(new Date())
 
       if (data.length > 0) {
-        // Calculate weighted mean
-        const center = calculateWeightedMean(data)
-        console.log('[PlacesVisualization] Weighted center:', center)
-        setWeightedCenter(center)
-
-        // Calculate convex hull if we have 3+ points
+        // Calculate convex hull for ALL places (including score 0)
         if (data.length >= 3) {
           const points = turf.featureCollection(
             data.map(place => turf.point(place.coordinates))
@@ -48,7 +102,7 @@ function PlacesVisualization() {
 
           // Create gradient buffers
           if (hullGeometry) {
-            const buffers = createGradientBuffers(hullGeometry, gradientWidth)
+            const buffers = createGradientBuffers(hullGeometry, GRADIENT_WIDTH)
             console.log('[PlacesVisualization] Created', buffers.length, 'gradient buffers')
             setGradientBuffers(buffers)
           }
@@ -62,7 +116,6 @@ function PlacesVisualization() {
           setGradientBuffers([])
         }
       } else {
-        setWeightedCenter(null)
         setConvexHull(null)
         setGradientBuffers([])
       }
@@ -86,15 +139,6 @@ function PlacesVisualization() {
 
     return () => clearInterval(interval)
   }, [])
-
-  // Recalculate gradient buffers when gradient width changes
-  useEffect(() => {
-    if (convexHull && convexHull.type === 'Polygon') {
-      const buffers = createGradientBuffers(convexHull, gradientWidth)
-      console.log('[PlacesVisualization] Recalculated gradient buffers:', buffers.length)
-      setGradientBuffers(buffers)
-    }
-  }, [gradientWidth, convexHull])
 
   if (loading && places.length === 0) {
     return (
@@ -148,38 +192,14 @@ function PlacesVisualization() {
               </span>
             </div>
           )}
-        </div>
-
-        <div className="radius-control">
-          <label htmlFor="radius-slider">
-            Sirkelradius: <strong>{circleRadius} km</strong>
-          </label>
-          <input
-            id="radius-slider"
-            type="range"
-            min="10"
-            max="200"
-            step="10"
-            value={circleRadius}
-            onChange={(e) => setCircleRadius(Number(e.target.value))}
-            className="radius-slider"
-          />
-        </div>
-
-        <div className="radius-control">
-          <label htmlFor="gradient-slider">
-            Gradientbredde: <strong>{gradientWidth} km</strong>
-          </label>
-          <input
-            id="gradient-slider"
-            type="range"
-            min="10"
-            max="300"
-            step="10"
-            value={gradientWidth}
-            onChange={(e) => setGradientWidth(Number(e.target.value))}
-            className="radius-slider"
-          />
+          {changedPlaces.length > 0 && (
+            <div className="stat-item">
+              <span className="stat-label">Endringer:</span>
+              <span className="stat-value" style={{ color: '#ef4444' }}>
+                {changedPlaces.length} ⚡
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="places-list">
@@ -205,10 +225,11 @@ function PlacesVisualization() {
 
       <div className="map-panel">
         <PlacesMap
-          weightedCenter={weightedCenter}
-          circleRadius={circleRadius}
+          places={places}
           convexHull={convexHull}
           gradientBuffers={gradientBuffers}
+          changedPlaces={changedPlaces}
+          animationDuration={ANIMATION_DURATION}
         />
       </div>
     </div>

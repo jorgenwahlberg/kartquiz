@@ -99,7 +99,7 @@ export async function fetchSheetData(sheetId, sheetName) {
         const coordinates = parseLatLon(row.Latlon)
         const score = parseFloat(row.Poeng)
 
-        if (!coordinates || isNaN(score) || score <= 0) {
+        if (!coordinates || isNaN(score) || score < 0) {
           return null
         }
 
