@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Popup, Circle, GeoJSON } from 'react-leaflet'
+import { MapContainer, TileLayer, Popup, Circle, CircleMarker, GeoJSON } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
@@ -12,9 +12,15 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
   const defaultCenter = [60.472, 8.4689]
   const defaultZoom = 5
 
-  // Calculate circle radius based on score
-  // Score 0 = 2000m (2km), higher scores scale proportionally
-  const getCircleRadius = (score) => {
+  // Calculate circle radius in pixels based on score
+  // Score 0 = 5 pixels, higher scores scale proportionally
+  const getCircleRadiusPixels = (score) => {
+    if (score === 0) return 5 // 5 pixels for score 0
+    return 5 + (score * 3) // Each point adds 3 pixels
+  }
+
+  // Calculate circle radius in meters (for animations only)
+  const getCircleRadiusMeters = (score) => {
     if (score === 0) return 2000 // 2 km for score 0
     return 2000 + (score * 2000) // Each point adds 2 km
   }
@@ -166,19 +172,19 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
             }}
             style={{
               fillColor: '#3b82f6',
-              fillOpacity: 0.04,
+              fillOpacity: 0.02,
               color: 'transparent',
               weight: 0
             }}
           />
         ))}
 
-        {/* Render place circles sized by score */}
+        {/* Render place circles sized by score - using CircleMarker for consistent pixel size */}
         {places && places.map((place, index) => (
-          <Circle
+          <CircleMarker
             key={`place-circle-${index}-${renderKey}`}
             center={[place.coordinates[1], place.coordinates[0]]}
-            radius={getCircleRadius(place.score)}
+            radius={getCircleRadiusPixels(place.score)}
             pathOptions={getCircleStyle(place.score)}
           >
             <Popup>
@@ -190,19 +196,19 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
                 Koordinater: {place.coordinates[1].toFixed(4)}, {place.coordinates[0].toFixed(4)}
               </div>
             </Popup>
-          </Circle>
+          </CircleMarker>
         ))}
 
         {/* Lightning flash animation for changed places */}
         {changedPlaces && changedPlaces.length > 0 && animationProgress > 0 && (
           <>
             {changedPlaces.map((changedPlace, index) => {
-              const baseRadius = getCircleRadius(changedPlace.score)
-              const waves = getExpandingWaveRadius(baseRadius, animationProgress)
+              const baseRadiusMeters = getCircleRadiusMeters(changedPlace.score)
+              const waves = getExpandingWaveRadius(baseRadiusMeters, animationProgress)
 
               if (index === 0) {
                 console.log('[PlacesMap] Rendering flash for', changedPlace.name,
-                           'at', changedPlace.coordinates, 'radius:', baseRadius * 1.5)
+                           'at', changedPlace.coordinates, 'radius:', baseRadiusMeters * 1.5)
               }
 
               return (
@@ -227,7 +233,7 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
                   <Circle
                     key={`flash-${index}-${renderKey}`}
                     center={[changedPlace.coordinates[1], changedPlace.coordinates[0]]}
-                    radius={baseRadius * 1.5} // 1.5x the base size
+                    radius={baseRadiusMeters * 1.5} // 1.5x the base size
                     pathOptions={getLightningFlashStyle(animationProgress)}
                   />
                 </React.Fragment>
