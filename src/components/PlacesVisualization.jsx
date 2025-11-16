@@ -7,7 +7,7 @@ const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
 const SHEET_NAME = 'Resultater'
 const REFRESH_INTERVAL = 10000 // 10 seconds
 const GRADIENT_WIDTH = 250 // km - configurable gradient width
-const ANIMATION_DURATION = 5000 // ms - duration of change animation
+const ANIMATION_DURATION = 10000 // ms - duration of change animation
 
 function PlacesVisualization() {
   const [places, setPlaces] = useState([])
@@ -90,10 +90,13 @@ function PlacesVisualization() {
       setLastUpdate(new Date())
 
       if (data.length > 0) {
-        // Calculate convex hull for ALL places (including score 0)
-        if (data.length >= 3) {
+        // Calculate convex hull only for places with score > 0
+        const placesWithScore = data.filter(p => p.score > 0)
+        console.log('[PlacesVisualization] Places with score > 0:', placesWithScore.length)
+
+        if (placesWithScore.length >= 3) {
           const points = turf.featureCollection(
-            data.map(place => turf.point(place.coordinates))
+            placesWithScore.map(place => turf.point(place.coordinates))
           )
           const hull = turf.convex(points)
           console.log('[PlacesVisualization] Convex hull:', hull ? 'created' : 'failed')
@@ -106,9 +109,9 @@ function PlacesVisualization() {
             console.log('[PlacesVisualization] Created', buffers.length, 'gradient buffers')
             setGradientBuffers(buffers)
           }
-        } else if (data.length === 2) {
+        } else if (placesWithScore.length === 2) {
           // For 2 points, create a line
-          const line = turf.lineString(data.map(p => p.coordinates))
+          const line = turf.lineString(placesWithScore.map(p => p.coordinates))
           setConvexHull(line.geometry)
           setGradientBuffers([])
         } else {
@@ -176,7 +179,7 @@ function PlacesVisualization() {
         <div className="stats">
           <div className="stat-item">
             <span className="stat-label">Antall steder:</span>
-            <span className="stat-value">{places.length}</span>
+            <span className="stat-value">{places.filter(p => p.score > 0).length}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Totalt poeng:</span>
@@ -206,6 +209,7 @@ function PlacesVisualization() {
           <h3>Steder med poeng:</h3>
           <div className="places-scroll">
             {places
+              .filter(p => p.score > 0)
               .sort((a, b) => b.score - a.score)
               .map((place, index) => (
                 <div key={index} className="place-item">
@@ -225,7 +229,7 @@ function PlacesVisualization() {
 
       <div className="map-panel">
         <PlacesMap
-          places={places}
+          places={places.filter(p => p.score > 0)}
           convexHull={convexHull}
           gradientBuffers={gradientBuffers}
           changedPlaces={changedPlaces}
