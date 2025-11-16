@@ -3,6 +3,152 @@
   "description": "Svar på spørsmålene for å vite hva du får i bursdagsgave!",
   "questions": [
     {
+      "id": 0,
+      "question": "Velg et vindistrikt",
+      "answers": [
+  {
+    "text": "Bordeaux, France",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-0.6456, 44.9205],
+        [-0.5181, 44.9205],
+        [-0.5181, 44.8070],
+        [-0.6456, 44.8070],
+        [-0.6456, 44.9205]
+      ]]
+    },
+    "note": "Simplified bounding box for the city of Bordeaux, which is central to the wider region. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Tuscany, Italy",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [9.6, 44.6],
+        [12.5, 44.6],
+        [12.5, 42.2],
+        [9.6, 42.2],
+        [9.6, 44.6]
+      ]]
+    },
+    "note": "Simplified bounding box for the administrative region of Tuscany, where key districts like Chianti are located. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Douro Valley, Portugal",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-7.8, 41.3],
+        [-6.5, 41.3],
+        [-6.5, 40.8],
+        [-7.8, 40.8],
+        [-7.8, 41.3]
+      ]]
+    },
+    "note": "Approximation of the general Douro wine region area, extending east of Porto. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Mosel, Germany",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [6.0, 50.0],
+        [7.5, 50.0],
+        [7.5, 49.0],
+        [6.0, 49.0],
+        [6.0, 50.0]
+      ]]
+    },
+    "note": "Approximation of the general area along the Mosel river in Germany. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Rioja, Spain",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-3.2, 42.8],
+        [-1.8, 42.8],
+        [-1.8, 42.2],
+        [-3.2, 42.2],
+        [-3.2, 42.8]
+      ]]
+    },
+    "note": "Approximation of the general Rioja wine region, extending along the Ebro Valley. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Burgundy (Bourgogne), France",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [3.0, 48.0],
+        [5.0, 48.0],
+        [5.0, 46.0],
+        [3.0, 46.0],
+        [3.0, 48.0]
+      ]]
+    },
+    "note": "Approximation for the overall Burgundy region (not the narrow Côte d'Or). Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Champagne, France",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [3.25, 50.25],
+        [6.0, 50.25],
+        [6.0, 47.5],
+        [3.25, 47.5],
+        [3.25, 50.25]
+      ]]
+    },
+    "note": "Simplified bounding box for the former administrative region of Champagne-Ardenne. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Piedmont (Piemonte), Italy",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [6.6, 46.5],
+        [9.2335, 46.5],
+        [9.2335, 44.0336],
+        [6.6, 44.0336],
+        [6.6, 46.5]
+      ]]
+    },
+    "note": "Simplified bounding box for the administrative region of Piedmont, home to Barolo and Barbaresco. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Rhône Valley, France",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [4.0, 46.0],
+        [5.0, 46.0],
+        [5.0, 43.5],
+        [4.0, 43.5],
+        [4.0, 46.0]
+      ]]
+    },
+    "note": "Approximation of the general north-south stretch of the Rhône Valley. Coordinates are [longitude, latitude]."
+  },
+  {
+    "text": "Prosecco (Veneto), Italy",
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [11.5, 46.0],
+        [13.5, 46.0],
+        [13.5, 45.0],
+        [11.5, 45.0],
+        [11.5, 46.0]
+      ]]
+    },
+    "note": "Approximation for the general region of Veneto, which contains the Prosecco DOC/DOCG areas. Coordinates are [longitude, latitude]."
+  }
+]
+     },
+    {
       "id": 1,
       "question": "Favoritt transportmiddel",
       "answers": [

@@ -1,0 +1,279 @@
+.visualization-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.control-panel {
+  flex: 0 0 400px;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: var(--panel-bg);
+  border-right: 1px solid var(--border-color);
+}
+
+.map-panel {
+  flex: 1;
+  position: relative;
+  background-color: #e5e3df;
+}
+
+.header h1 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+
+.description {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.stats {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: var(--answer-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.radius-control {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: var(--answer-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.radius-control label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.radius-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--progress-bg);
+  outline: none;
+  cursor: pointer;
+}
+
+.radius-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.radius-slider::-webkit-slider-thumb:hover {
+  background: var(--primary-hover);
+}
+
+.radius-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.radius-slider::-moz-range-thumb:hover {
+  background: var(--primary-hover);
+}
+
+.places-list {
+  margin-bottom: 1.5rem;
+}
+
+.places-list h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.places-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: var(--answer-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.place-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--button-bg);
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.place-item:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.place-item:last-child {
+  margin-bottom: 0;
+}
+
+.place-name {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.place-score {
+  font-size: 0.85rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.loading-message,
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loading-message h2,
+.error-message h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+}
+
+.error-message h2 {
+  color: var(--error-color);
+}
+
+.loading-message p,
+.error-message p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.btn-retry {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 1rem;
+}
+
+.btn-retry:hover {
+  background-color: var(--primary-hover);
+}
+
+.warning-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--warning-bg);
+  border-radius: 6px;
+  border: 1px solid var(--warning-color);
+}
+
+.warning-message small {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .visualization-container {
+    flex-direction: column;
+  }
+
+  .control-panel {
+    flex: 0 0 auto;
+    max-height: 50vh;
+  }
+
+  .map-panel {
+    flex: 1;
+  }
+}
+
+/* CSS Variables for theming */
+:root {
+  --panel-bg: #ffffff;
+  --button-bg: #ffffff;
+  --button-hover-bg: #f8f9fa;
+  --answer-bg: #f8f9fa;
+  --info-bg: #e7f3ff;
+  --warning-bg: #fff3cd;
+  --progress-bg: #e9ecef;
+  --border-color: #dee2e6;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --primary-color: #3388ff;
+  --primary-hover: #2266dd;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --error-color: #dc3545;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --panel-bg: #1a1a1a;
+    --button-bg: #2a2a2a;
+    --button-hover-bg: #333333;
+    --answer-bg: #2a2a2a;
+    --info-bg: #1e2a3a;
+    --warning-bg: #3a2f1a;
+    --progress-bg: #333333;
+    --border-color: #444444;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --primary-color: #5599ff;
+    --primary-hover: #3377dd;
+    --success-color: #40c057;
+    --warning-color: #fab005;
+    --error-color: #ff6b6b;
+  }
+}

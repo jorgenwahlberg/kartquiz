@@ -33,21 +33,26 @@ npm test -- -t "test name pattern"           # Run tests matching pattern
 - **Vitest** - Test runner (Vite-native, Jest-compatible API)
 - **ESLint** - Code linting with React-specific rules
 - **Leaflet + react-leaflet** - Interactive map rendering
-- **Turf.js** - Geospatial operations (polygon intersections)
+- **Turf.js** - Geospatial operations (convex hull, weighted mean)
 
 ### Application Structure
 
 This is a **frontend-only SPA** (single-page application). The core architecture follows a component-based pattern:
 
-**Quiz Flow:**
-1. Quiz data (with polygon geometries) is loaded from JSON in `src/data/`
-2. `PolygonQuiz` component manages quiz state and selected answers
-3. Each answer has an associated GeoJSON polygon representing a region on the map
-4. As user answers questions, polygons are intersected to narrow down the region
-5. Final result shows the intersection of all selected answer polygons on the map
+**Data Visualization Flow:**
+1. Data is fetched from Google Sheets every 10 seconds
+2. `PlacesVisualization` component manages data loading and refresh
+3. Each place has coordinates and a score
+4. `PlacesMap` component renders all places as markers on the map
+5. Weighted geographic mean (based on scores) is shown as a red marker with a configurable radius circle
+6. A convex hull polygon surrounds all places with points
 
 **Core Concept:**
-This is a **geography narrowing quiz** where each question's answers have corresponding polygons on a map of Europe. The map progressively shows the intersection of all chosen polygons, visually narrowing down a geographic region based on the user's selections.
+This is a **geographic data visualization app** that displays places with scores on a map. The app shows:
+- Individual places as blue markers
+- Weighted geographic mean as a red marker with a radius circle
+- Convex hull (boundary polygon) around all places
+- Auto-refresh every 10 seconds from Google Sheets
 
 **State Management:**
 - Currently uses React's built-in `useState` for local component state
@@ -63,76 +68,84 @@ This is a **geography narrowing quiz** where each question's answers have corres
 ```
 src/
 ├── components/
-│   ├── PolygonQuiz.jsx  # Main quiz component with polygon intersection logic
-│   ├── PolygonQuiz.css  # Styles for quiz interface
-│   └── EuropeMap.jsx    # Leaflet map component for displaying polygons
+│   ├── PlacesVisualization.jsx  # Main visualization component with data loading
+│   ├── PlacesVisualization.css  # Styles for visualization interface
+│   ├── PlacesMap.jsx            # Leaflet map component for displaying places
+│   ├── PolygonQuiz.jsx          # Legacy quiz component (no longer used)
+│   ├── PolygonQuiz.css          # Legacy quiz styles
+│   └── EuropeMap.jsx            # Legacy map component (no longer used)
 ├── hooks/         # Custom React hooks (not yet used)
 ├── utils/
-│   └── polygonUtils.js  # Geospatial utilities (intersection, validation)
+│   ├── sheetUtils.js    # Google Sheets data fetching and processing
+│   └── polygonUtils.js  # Geospatial utilities (legacy)
 ├── data/
-│   └── europeQuiz.json  # Quiz configuration with GeoJSON polygons
+│   └── europeQuiz.json  # Legacy quiz data (no longer used)
 └── styles/        # Additional shared styles
 ```
 
 ## Key Patterns
 
-### Quiz Data Format
-Quiz data is stored in JSON files (see `src/data/europeQuiz.json`). The format follows this structure:
+### Google Sheets Data Integration
+Data is fetched from a Google Sheets document every 10 seconds. The sheet must be publicly accessible (view-only is sufficient).
 
-```json
-{
-  "title": "Quiz Title",
-  "description": "Quiz description",
-  "questions": [
-    {
-      "id": 1,
-      "question": "Question text?",
-      "answers": [
-        {
-          "text": "Answer text",
-          "polygon": {
-            "type": "Polygon",
-            "coordinates": [[[lon, lat], [lon, lat], ...]]
-          }
-        }
-      ]
-    }
-  ]
-}
-```
+**Sheet Configuration:**
+- Sheet ID: `10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI`
+- Sheet Name: `Resultater`
+- Refresh Interval: 10 seconds
 
-**Polygon Format:**
-- Uses GeoJSON Polygon geometry format
-- Coordinates are `[longitude, latitude]` pairs
-- First and last coordinate must be identical (closed polygon)
-- Outer ring is counter-clockwise, holes are clockwise
-- Europe roughly spans: longitude -10 to 50, latitude 35 to 71
+**Expected Column Format:**
+- `Sted` - Place name (text)
+- `Latlon` - Coordinates in format "latitude,longitude" (e.g., "59.9139,10.7522")
+- `Poeng` - Score/points (number)
+
+**Data Processing:**
+1. Sheet is fetched as CSV using Google Sheets export URL
+2. Rows are parsed and validated
+3. Only places with valid coordinates and positive scores are included
+4. Coordinates are converted to GeoJSON format `[longitude, latitude]`
+
+### Visualization Features
+
+**Weighted Geographic Mean:**
+- Calculated using scores as weights
+- Formula: `weighted_lon = Σ(lon_i × score_i) / Σ(score_i)`
+- Displayed as a red marker with configurable radius circle
+
+**Convex Hull:**
+- Calculated using Turf.js `convex()` function
+- Automatically surrounds all places with points
+- Requires 3+ points (for 2 points, shows a line)
+
+**Auto-Refresh:**
+- Data is refreshed every 10 seconds automatically
+- Errors during refresh don't clear existing data
+- Last update time is displayed in the UI
 
 ### Adding New Features
 
-**Creating a New Quiz:**
-1. Create a new JSON file in `src/data/` (e.g., `africaQuiz.json`)
-2. Follow the quiz data format with valid GeoJSON polygons
-3. Update `App.jsx` to load your new quiz file
-4. Test polygon intersections work correctly
+**Changing Data Source:**
+1. Update `SHEET_ID` and `SHEET_NAME` in `PlacesVisualization.jsx`
+2. Ensure the sheet has columns: `Sted`, `Latlon`, `Poeng`
+3. Make sure the sheet is publicly accessible (Share > Anyone with link can view)
+4. Test data fetching and validation
+
+**Customizing Visualization:**
+- Adjust `REFRESH_INTERVAL` in `PlacesVisualization.jsx` (default: 10000ms)
+- Change default circle radius in component state (default: 50km)
+- Modify marker icons in `PlacesMap.jsx` using Leaflet's Icon API
+- Customize colors and styles in `PlacesVisualization.css`
 
 **Adding Map Functionality:**
-- Map component is `EuropeMap.jsx` using react-leaflet
+- Map component is `PlacesMap.jsx` using react-leaflet
 - Customize map center, zoom, and tile layers in the component
-- Add markers, popups, or other Leaflet features as needed
+- Add additional markers, popups, or other Leaflet features as needed
+- Use Turf.js for geospatial calculations
 
-**Polygon Operations:**
-- All geospatial operations use Turf.js in `src/utils/polygonUtils.js`
-- `intersectPolygons()` - calculates intersection of multiple polygons
-- `isValidPolygon()` - validates GeoJSON polygon structure
-- `getPolygonCenter()` - finds center point of polygon
-- `getPolygonArea()` - calculates area in km²
-
-**Working with GeoJSON:**
-- Use tools like geojson.io to draw and export polygons
-- Validate GeoJSON at geojsonlint.com
-- Keep polygons simple for better performance
-- Complex intersections may result in MultiPolygons (handled automatically)
+**Data Processing:**
+- `fetchSheetData()` in `src/utils/sheetUtils.js` handles data fetching
+- `parseLatLon()` converts coordinate strings to `[lon, lat]` arrays
+- `calculateWeightedMean()` computes weighted geographic center
+- All functions include validation and error handling
 
 ### Component Conventions
 - Use functional components with hooks
