@@ -146,6 +146,81 @@ export function calculateWeightedMean(places) {
 }
 
 /**
+ * Fetch quiz questions and check for active question
+ * @param {string} sheetId - Google Sheets ID
+ * @returns {Promise<Object|null>} - Active question object or null
+ */
+export async function fetchActiveQuizQuestion(sheetId) {
+  try {
+    // Fetch the "Spørsmål og svar" sheet
+    const questionsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Spørsmål og svar')}`
+    console.log('[fetchActiveQuizQuestion] Fetching questions from:', questionsUrl)
+
+    const questionsResponse = await fetch(questionsUrl)
+    if (!questionsResponse.ok) {
+      throw new Error(`Failed to fetch questions: ${questionsResponse.status}`)
+    }
+
+    const questionsCSV = await questionsResponse.text()
+    const questionRows = parseCSV(questionsCSV)
+
+    // Find question with "x" or "Ja" in Skjermvisning column
+    const activeQuestion = questionRows.find(row => {
+      const display = (row.Skjermvisning || '').toLowerCase().trim()
+      return display === 'x' || display === 'ja'
+    })
+
+    if (!activeQuestion) {
+      console.log('[fetchActiveQuizQuestion] No active question found')
+      return null
+    }
+
+    const questionNumber = activeQuestion.Nr
+    console.log('[fetchActiveQuizQuestion] Active question number:', questionNumber)
+
+    // Fetch the "Svaralternativer" sheet
+    const answersUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Svaralternativer')}`
+    console.log('[fetchActiveQuizQuestion] Fetching answers from:', answersUrl)
+
+    const answersResponse = await fetch(answersUrl)
+    if (!answersResponse.ok) {
+      throw new Error(`Failed to fetch answers: ${answersResponse.status}`)
+    }
+
+    const answersCSV = await answersResponse.text()
+    const answerRows = parseCSV(answersCSV)
+
+    // Find all rows with matching question number
+    const questionData = answerRows.filter(row => row.Nr === questionNumber)
+
+    if (questionData.length === 0) {
+      console.log('[fetchActiveQuizQuestion] No question data found for number:', questionNumber)
+      return null
+    }
+
+    // Get question text from first row
+    const questionText = questionData[0].Spørsmål || ''
+
+    // Get all alternatives
+    const alternatives = questionData
+      .map(row => row.Alternativ)
+      .filter(alt => alt && alt.trim().length > 0)
+
+    console.log('[fetchActiveQuizQuestion] Question:', questionText)
+    console.log('[fetchActiveQuizQuestion] Alternatives:', alternatives.length)
+
+    return {
+      number: questionNumber,
+      question: questionText,
+      alternatives: alternatives
+    }
+  } catch (error) {
+    console.error('[fetchActiveQuizQuestion] Error:', error)
+    return null
+  }
+}
+
+/**
  * Create gradient buffer layers around a polygon
  * @param {Object} polygon - GeoJSON polygon geometry
  * @param {number} gradientWidth - Total gradient width in kilometers

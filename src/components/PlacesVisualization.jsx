@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import PlacesMap from './PlacesMap'
-import { fetchSheetData, createGradientBuffers } from '../utils/sheetUtils'
+import QuizOverlay from './QuizOverlay'
+import { fetchSheetData, createGradientBuffers, fetchActiveQuizQuestion } from '../utils/sheetUtils'
 import * as turf from '@turf/turf'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
@@ -18,6 +19,7 @@ function PlacesVisualization() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)
+  const [activeQuestion, setActiveQuestion] = useState(null)
 
   const loadData = async () => {
     try {
@@ -131,13 +133,30 @@ function PlacesVisualization() {
     }
   }
 
+  const loadQuizQuestion = async () => {
+    try {
+      const question = await fetchActiveQuizQuestion(SHEET_ID)
+      setActiveQuestion(question)
+
+      if (question) {
+        console.log('[PlacesVisualization] Active quiz question:', question.number)
+      } else {
+        console.log('[PlacesVisualization] No active quiz question')
+      }
+    } catch (err) {
+      console.error('[PlacesVisualization] Error loading quiz question:', err)
+    }
+  }
+
   // Load data on mount and set up refresh interval
   useEffect(() => {
     loadData()
+    loadQuizQuestion()
 
     const interval = setInterval(() => {
       console.log('[PlacesVisualization] Auto-refreshing data...')
       loadData()
+      loadQuizQuestion()
     }, REFRESH_INTERVAL)
 
     return () => clearInterval(interval)
@@ -235,6 +254,7 @@ function PlacesVisualization() {
           changedPlaces={changedPlaces}
           animationDuration={ANIMATION_DURATION}
         />
+        <QuizOverlay questionData={activeQuestion} />
       </div>
     </div>
   )
