@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
+import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
 import PlacesMap from './PlacesMap'
 import QuizOverlay from './QuizOverlay'
-import { fetchSheetData, createGradientBuffers, fetchActiveQuizQuestion } from '../utils/sheetUtils'
+import { fetchSheetData, createGradientBuffers, fetchAllQuizQuestions, fetchQuestionByNumber } from '../utils/sheetUtils'
+import { initializeGapi, submitAnswerToSheet } from '../utils/googleAuth'
 import * as turf from '@turf/turf'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
@@ -9,8 +11,9 @@ const SHEET_NAME = 'Resultater'
 const REFRESH_INTERVAL = 10000 // 10 seconds
 const GRADIENT_WIDTH = 250 // km - configurable gradient width
 const ANIMATION_DURATION = 10000 // ms - duration of change animation
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
-function PlacesVisualization() {
+function PlacesVisualizationInner() {
   const [places, setPlaces] = useState([])
   const previousPlacesRef = useRef([]) // Use ref to avoid closure issues
   const [changedPlaces, setChangedPlaces] = useState([])
@@ -19,7 +22,11 @@ function PlacesVisualization() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)
+  const [allQuestions, setAllQuestions] = useState([])
   const [activeQuestion, setActiveQuestion] = useState(null)
+  const [showQuizOverlay, setShowQuizOverlay] = useState(false)
+  const [accessToken, setAccessToken] = useState(null)
+  const [gapiReady, setGapiReady] = useState(false)
 
   const loadData = async () => {
     try {
@@ -45,12 +52,16 @@ function PlacesVisualization() {
             console.log('[PlacesVisualization] New place:', currentPlace.name)
             changes.push({ ...currentPlace, changeType: 'new' })
           } else if (prevPlace.score !== currentPlace.score) {
+            // Check if place went from 0 to having points (appearing on map)
+            const isNewlyAppearing = prevPlace.score === 0 && currentPlace.score > 0
+
             // Score changed
             console.log('[PlacesVisualization] Score changed for', currentPlace.name,
-              'from', prevPlace.score, 'to', currentPlace.score)
+              'from', prevPlace.score, 'to', currentPlace.score,
+              isNewlyAppearing ? '(NEWLY APPEARING)' : '')
             changes.push({
               ...currentPlace,
-              changeType: 'updated',
+              changeType: isNewlyAppearing ? 'new' : 'updated',
               previousScore: prevPlace.score
             })
           } else {
@@ -133,30 +144,93 @@ function PlacesVisualization() {
     }
   }
 
-  const loadQuizQuestion = async () => {
+  const loadAllQuestions = async () => {
     try {
-      const question = await fetchActiveQuizQuestion(SHEET_ID)
-      setActiveQuestion(question)
-
-      if (question) {
-        console.log('[PlacesVisualization] Active quiz question:', question.number)
-      } else {
-        console.log('[PlacesVisualization] No active quiz question')
-      }
+      const questions = await fetchAllQuizQuestions(SHEET_ID)
+      setAllQuestions(questions)
+      console.log('[PlacesVisualization] Loaded', questions.length, 'questions')
     } catch (err) {
-      console.error('[PlacesVisualization] Error loading quiz question:', err)
+      console.error('[PlacesVisualization] Error loading quiz questions:', err)
     }
+  }
+
+  // Find next unanswered question
+  const getNextUnansweredQuestion = () => {
+    return allQuestions.find(q => !q.isAnswered) || null
+  }
+
+  // Open quiz with next unanswered question
+  const handleOpenQuiz = () => {
+    const nextQuestion = getNextUnansweredQuestion()
+    if (nextQuestion) {
+      setActiveQuestion(nextQuestion)
+      setShowQuizOverlay(true)
+    } else {
+      alert('Alle spørsmål er besvart!')
+    }
+  }
+
+  // Open specific question
+  const handleSelectQuestion = (questionNumber) => {
+    const question = allQuestions.find(q => q.number === questionNumber)
+    if (question) {
+      setActiveQuestion(question)
+      setShowQuizOverlay(true)
+    }
+  }
+
+  // Close quiz overlay and refresh data
+  const handleCloseQuiz = () => {
+    setShowQuizOverlay(false)
+    setActiveQuestion(null)
+    // Reload map data and questions immediately
+    loadData()
+    loadAllQuestions()
+  }
+
+  // Initialize Google API client on mount
+  useEffect(() => {
+    initializeGapi(() => {
+      console.log('[PlacesVisualization] GAPI initialized')
+      setGapiReady(true)
+    })
+  }, [])
+
+  // Google OAuth login
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      console.log('[PlacesVisualization] OAuth login successful')
+      setAccessToken(tokenResponse.access_token)
+    },
+    onError: (error) => {
+      console.error('[PlacesVisualization] OAuth login failed:', error)
+      alert('Kunne ikke logge inn. Prøv igjen.')
+    },
+    scope: 'https://www.googleapis.com/auth/spreadsheets'
+  })
+
+  // Handle answer submission
+  const handleSubmitAnswer = async (questionNumber, answer) => {
+    if (!accessToken || !gapiReady) {
+      throw new Error('Not authenticated or GAPI not ready')
+    }
+
+    console.log('[PlacesVisualization] Submitting answer:', answer, 'for question:', questionNumber)
+    await submitAnswerToSheet(SHEET_ID, questionNumber, answer, accessToken)
+
+    // Reload questions to update answer status
+    await loadAllQuestions()
   }
 
   // Load data on mount and set up refresh interval
   useEffect(() => {
     loadData()
-    loadQuizQuestion()
+    loadAllQuestions()
 
     const interval = setInterval(() => {
       console.log('[PlacesVisualization] Auto-refreshing data...')
       loadData()
-      loadQuizQuestion()
+      loadAllQuestions()
     }, REFRESH_INTERVAL)
 
     return () => clearInterval(interval)
@@ -191,8 +265,51 @@ function PlacesVisualization() {
     <div className="visualization-container">
       <div className="control-panel">
         <div className="header">
-          <h1>Resultatvisualisering</h1>
-          <p className="description">Geografisk fordeling av poeng</p>
+          <h1>Kor ska Sverre reis?</h1>
+          <p className="description"></p>
+        </div>
+
+        <div className="quiz-controls">
+          <button onClick={handleOpenQuiz} className="btn-quiz">
+            📝 Spørsmål {getNextUnansweredQuestion()?.number || '✓'}
+          </button>
+
+          {allQuestions.length > 0 && (
+            <div className="question-selector">
+              <label htmlFor="question-select"></label>
+              <select
+                id="question-select"
+                onChange={(e) => handleSelectQuestion(e.target.value)}
+                value=""
+              >
+                <option value="">-- Velg et spørsmål --</option>
+                {allQuestions.map((q) => (
+                  <option key={q.number} value={q.number}>
+                    {q.number}. {q.question.substring(0, 50)}{q.question.length > 50 ? '...' : ''}
+                    {q.isAnswered ? ' ✓' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        <div className="places-list">
+          <h3>Resultatliste:</h3>
+          <div className="places-scroll">
+            {places
+              .filter(p => p.score > 0)
+              .sort((a, b) => b.score - a.score)
+              .map((place, index) => {
+                const isChanged = changedPlaces.some(cp => cp.name === place.name)
+                return (
+                  <div key={index} className={`place-item ${isChanged ? 'place-changed' : ''}`}>
+                    <span className="place-name">{place.name}</span>
+                    <span className="place-score">{place.score} poeng</span>
+                  </div>
+                )
+              })}
+          </div>
         </div>
 
         <div className="stats">
@@ -224,21 +341,6 @@ function PlacesVisualization() {
           )}
         </div>
 
-        <div className="places-list">
-          <h3>Steder med poeng:</h3>
-          <div className="places-scroll">
-            {places
-              .filter(p => p.score > 0)
-              .sort((a, b) => b.score - a.score)
-              .map((place, index) => (
-                <div key={index} className="place-item">
-                  <span className="place-name">{place.name}</span>
-                  <span className="place-score">{place.score} poeng</span>
-                </div>
-              ))}
-          </div>
-        </div>
-
         {error && (
           <div className="warning-message">
             <small>Advarsel: {error}</small>
@@ -254,9 +356,26 @@ function PlacesVisualization() {
           changedPlaces={changedPlaces}
           animationDuration={ANIMATION_DURATION}
         />
-        <QuizOverlay questionData={activeQuestion} />
       </div>
+
+      {showQuizOverlay && (
+        <QuizOverlay
+          questionData={activeQuestion}
+          onSubmitAnswer={handleSubmitAnswer}
+          isAuthenticated={!!accessToken}
+          onSignIn={() => login()}
+          onClose={handleCloseQuiz}
+        />
+      )}
     </div>
+  )
+}
+
+function PlacesVisualization() {
+  return (
+    <GoogleOAuthProvider clientId={CLIENT_ID}>
+      <PlacesVisualizationInner />
+    </GoogleOAuthProvider>
   )
 }
 

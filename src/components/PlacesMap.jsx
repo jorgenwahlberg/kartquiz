@@ -97,13 +97,19 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
     setRenderKey(prev => prev + 1)
   }, [places, convexHull, gradientBuffers, changedPlaces, animationProgress])
 
-  // Style for place circles - semi-transparent
-  const getCircleStyle = (score) => ({
-    fillColor: '#3b82f6',
-    fillOpacity: 0.4,
-    color: '#2563eb',
-    weight: 2
-  })
+  // Find the maximum score to identify leaders
+  const maxScore = places && places.length > 0 ? Math.max(...places.map(p => p.score)) : 0
+
+  // Style for place circles - semi-transparent, gold for leaders
+  const getCircleStyle = (score) => {
+    const isLeader = score === maxScore && score > 0
+    return {
+      fillColor: isLeader ? '#fbbf24' : '#3b82f6',
+      fillOpacity: isLeader ? 0.5 : 0.4,
+      color: isLeader ? '#f59e0b' : '#2563eb',
+      weight: isLeader ? 3 : 2
+    }
+  }
 
   // Lightning flash effect - pulsing with multiple waves
   const getLightningFlashStyle = (progress) => {
@@ -204,11 +210,13 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
           <>
             {changedPlaces.map((changedPlace, index) => {
               const baseRadiusMeters = getCircleRadiusMeters(changedPlace.score)
+              const isNewPlace = changedPlace.changeType === 'new'
               const waves = getExpandingWaveRadius(baseRadiusMeters, animationProgress)
 
               if (index === 0) {
                 console.log('[PlacesMap] Rendering flash for', changedPlace.name,
-                           'at', changedPlace.coordinates, 'radius:', baseRadiusMeters * 1.5)
+                           'at', changedPlace.coordinates, 'radius:', baseRadiusMeters * 1.5,
+                           'isNew:', isNewPlace)
               }
 
               return (
@@ -220,21 +228,27 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
                       center={[changedPlace.coordinates[1], changedPlace.coordinates[0]]}
                       radius={wave.radius}
                       pathOptions={{
-                        fillColor: '#ef4444',
+                        fillColor: isNewPlace ? '#fbbf24' : '#ef4444', // Gold for new, red for updated
                         fillOpacity: 0,
-                        color: '#dc2626',
-                        weight: 3,
-                        opacity: wave.opacity
+                        color: isNewPlace ? '#f59e0b' : '#dc2626',
+                        weight: isNewPlace ? 5 : 3, // Thicker for new places
+                        opacity: wave.opacity * (isNewPlace ? 1.5 : 1) // More visible for new
                       }}
                     />
                   ))}
 
-                  {/* Central lightning flash - smaller red pulse */}
+                  {/* Central lightning flash - smaller pulse */}
                   <Circle
                     key={`flash-${index}-${renderKey}`}
                     center={[changedPlace.coordinates[1], changedPlace.coordinates[0]]}
-                    radius={baseRadiusMeters * 1.5} // 1.5x the base size
-                    pathOptions={getLightningFlashStyle(animationProgress)}
+                    radius={baseRadiusMeters * (isNewPlace ? 2.5 : 1.5)} // Bigger for new places
+                    pathOptions={{
+                      fillColor: isNewPlace ? '#fbbf24' : '#ef4444',
+                      fillOpacity: Math.max(0.3, (Math.sin(animationProgress * 10 * Math.PI * 2) * 0.5 + 0.5) * Math.pow(1 - animationProgress, 0.5)),
+                      color: isNewPlace ? '#f59e0b' : '#dc2626',
+                      weight: isNewPlace ? 5 : 4,
+                      opacity: Math.pow(1 - animationProgress, 0.5) * (isNewPlace ? 1.2 : 1)
+                    }}
                   />
                 </React.Fragment>
               )

@@ -146,15 +146,15 @@ export function calculateWeightedMean(places) {
 }
 
 /**
- * Fetch quiz questions and check for active question
+ * Fetch all quiz questions with their answer status
  * @param {string} sheetId - Google Sheets ID
- * @returns {Promise<Object|null>} - Active question object or null
+ * @returns {Promise<Array>} - Array of question objects with answer status
  */
-export async function fetchActiveQuizQuestion(sheetId) {
+export async function fetchAllQuizQuestions(sheetId) {
   try {
     // Fetch the "Spørsmål og svar" sheet
     const questionsUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Spørsmål og svar')}`
-    console.log('[fetchActiveQuizQuestion] Fetching questions from:', questionsUrl)
+    console.log('[fetchAllQuizQuestions] Fetching questions from:', questionsUrl)
 
     const questionsResponse = await fetch(questionsUrl)
     if (!questionsResponse.ok) {
@@ -164,23 +164,9 @@ export async function fetchActiveQuizQuestion(sheetId) {
     const questionsCSV = await questionsResponse.text()
     const questionRows = parseCSV(questionsCSV)
 
-    // Find question with "x" or "Ja" in Skjermvisning column
-    const activeQuestion = questionRows.find(row => {
-      const display = (row.Skjermvisning || '').toLowerCase().trim()
-      return display === 'x' || display === 'ja'
-    })
-
-    if (!activeQuestion) {
-      console.log('[fetchActiveQuizQuestion] No active question found')
-      return null
-    }
-
-    const questionNumber = activeQuestion.Nr
-    console.log('[fetchActiveQuizQuestion] Active question number:', questionNumber)
-
     // Fetch the "Svaralternativer" sheet
     const answersUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Svaralternativer')}`
-    console.log('[fetchActiveQuizQuestion] Fetching answers from:', answersUrl)
+    console.log('[fetchAllQuizQuestions] Fetching answers from:', answersUrl)
 
     const answersResponse = await fetch(answersUrl)
     if (!answersResponse.ok) {
@@ -190,34 +176,55 @@ export async function fetchActiveQuizQuestion(sheetId) {
     const answersCSV = await answersResponse.text()
     const answerRows = parseCSV(answersCSV)
 
-    // Find all rows with matching question number
-    const questionData = answerRows.filter(row => row.Nr === questionNumber)
+    // Build array of all questions
+    const questions = questionRows.map(row => {
+      const questionNumber = row.Nr
+      const questionText = row.Tekst || '' // Column is called "Tekst" not "Spørsmål"
+      const userAnswer = row.Svar
 
-    if (questionData.length === 0) {
-      console.log('[fetchActiveQuizQuestion] No question data found for number:', questionNumber)
-      return null
-    }
+      // Find all alternatives for this question
+      const questionData = answerRows.filter(altRow => altRow.Nr === questionNumber)
+      const alternatives = questionData
+        .map(altRow => altRow.Alternativ)
+        .filter(alt => alt && alt.trim().length > 0)
 
-    // Get question text from first row
-    const questionText = questionData[0].Spørsmål || ''
+      // Check if answer exists and is not empty/whitespace
+      const isAnswered = userAnswer !== undefined &&
+                        userAnswer !== null &&
+                        typeof userAnswer === 'string' &&
+                        userAnswer.trim().length > 0
 
-    // Get all alternatives
-    const alternatives = questionData
-      .map(row => row.Alternativ)
-      .filter(alt => alt && alt.trim().length > 0)
+      return {
+        number: questionNumber,
+        question: questionText,
+        alternatives: alternatives,
+        answer: userAnswer || null, // User's answer if exists
+        isAnswered: isAnswered
+      }
+    })
 
-    console.log('[fetchActiveQuizQuestion] Question:', questionText)
-    console.log('[fetchActiveQuizQuestion] Alternatives:', alternatives.length)
+    // Filter out questions without text or alternatives
+    const filteredQuestions = questions.filter(q => q.question && q.alternatives.length > 0)
 
-    return {
-      number: questionNumber,
-      question: questionText,
-      alternatives: alternatives
-    }
+    console.log('[fetchAllQuizQuestions] Loaded', filteredQuestions.length, 'questions')
+    console.log('[fetchAllQuizQuestions] Answered:', filteredQuestions.filter(q => q.isAnswered).length)
+
+    return filteredQuestions
   } catch (error) {
-    console.error('[fetchActiveQuizQuestion] Error:', error)
-    return null
+    console.error('[fetchAllQuizQuestions] Error:', error)
+    return []
   }
+}
+
+/**
+ * Get a specific question by number
+ * @param {string} sheetId - Google Sheets ID
+ * @param {string} questionNumber - Question number to fetch
+ * @returns {Promise<Object|null>} - Question object or null
+ */
+export async function fetchQuestionByNumber(sheetId, questionNumber) {
+  const allQuestions = await fetchAllQuizQuestions(sheetId)
+  return allQuestions.find(q => q.number === questionNumber) || null
 }
 
 /**
