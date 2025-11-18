@@ -98,3 +98,61 @@ export async function submitAnswerToSheet(sheetId, questionNumber, userAnswer, a
     throw error
   }
 }
+
+/**
+ * Reset all answers in the Google Sheet
+ * @param {string} sheetId - Google Sheets ID
+ * @param {string} accessToken - OAuth access token
+ * @returns {Promise<boolean>} - Success status
+ */
+export async function resetAllAnswers(sheetId, accessToken) {
+  try {
+    // Set the access token
+    window.gapi.client.setToken({ access_token: accessToken })
+
+    const range = 'Spørsmål og svar!A:Z'
+
+    console.log('[googleAuth] Fetching sheet data to reset all answers')
+
+    // First, get all rows to find the answer column
+    const response = await window.gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: range,
+    })
+
+    const rows = response.result.values
+    let answerColumnIndex = -1
+
+    // Find header row to locate "Svar" column
+    if (rows && rows.length > 0) {
+      const headers = rows[0]
+      answerColumnIndex = headers.findIndex(h => h === 'Svar')
+
+      if (answerColumnIndex === -1) {
+        throw new Error('Could not find "Svar" column in sheet')
+      }
+
+      console.log('[googleAuth] Found "Svar" column at index:', answerColumnIndex)
+    }
+
+    // Convert column index to letter (0 = A, 1 = B, etc.)
+    const columnLetter = String.fromCharCode(65 + answerColumnIndex)
+
+    // Clear all answer values (starting from row 2 to skip header)
+    const clearRange = `Spørsmål og svar!${columnLetter}2:${columnLetter}`
+
+    console.log('[googleAuth] Clearing range:', clearRange)
+
+    // Clear the answer column
+    await window.gapi.client.sheets.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: clearRange,
+    })
+
+    console.log('[googleAuth] ✓ All answers cleared successfully')
+    return true
+  } catch (error) {
+    console.error('[googleAuth] Error clearing answers:', error)
+    throw error
+  }
+}

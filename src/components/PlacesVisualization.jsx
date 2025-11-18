@@ -3,7 +3,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
 import PlacesMap from './PlacesMap'
 import QuizOverlay from './QuizOverlay'
 import { fetchSheetData, createGradientBuffers, fetchAllQuizQuestions, fetchQuestionByNumber } from '../utils/sheetUtils'
-import { initializeGapi, submitAnswerToSheet } from '../utils/googleAuth'
+import { initializeGapi, submitAnswerToSheet, resetAllAnswers } from '../utils/googleAuth'
 import * as turf from '@turf/turf'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
@@ -27,6 +27,7 @@ function PlacesVisualizationInner() {
   const [showQuizOverlay, setShowQuizOverlay] = useState(false)
   const [accessToken, setAccessToken] = useState(null)
   const [gapiReady, setGapiReady] = useState(false)
+  const [boundingBoxPlaces, setBoundingBoxPlaces] = useState(null) // null means use all places
 
   const loadData = async () => {
     try {
@@ -222,6 +223,31 @@ function PlacesVisualizationInner() {
     await loadAllQuestions()
   }
 
+  // Handle reset answers
+  const handleResetAnswers = async () => {
+    if (!accessToken || !gapiReady) {
+      alert('Du må logge inn først for å nullstille svar.')
+      return
+    }
+
+    const confirmed = window.confirm('Er du sikker på at du vil nullstille alle svar? Dette kan ikke angres.')
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      console.log('[PlacesVisualization] Resetting all answers')
+      await resetAllAnswers(SHEET_ID, accessToken)
+      // Reload data and questions to reflect changes
+      await loadData()
+      await loadAllQuestions()
+      alert('Alle svar er nullstilt!')
+    } catch (error) {
+      console.error('[PlacesVisualization] Error resetting answers:', error)
+      alert('Kunne ikke nullstille svar. Prøv igjen.')
+    }
+  }
+
   // Load data on mount and set up refresh interval
   useEffect(() => {
     loadData()
@@ -341,6 +367,27 @@ function PlacesVisualizationInner() {
           )}
         </div>
 
+        <div className="reset-control">
+          <button onClick={handleResetAnswers} className="btn-reset">
+            Start på nytt
+          </button>
+        </div>
+
+        <div className="bounding-box-control">
+          <label htmlFor="bounding-box-slider">
+            Antall steder for kartvisning: {boundingBoxPlaces === null ? places.filter(p => p.score > 0).length : boundingBoxPlaces}
+          </label>
+          <input
+            id="bounding-box-slider"
+            type="range"
+            min="1"
+            max={Math.max(1, places.filter(p => p.score > 0).length)}
+            value={boundingBoxPlaces === null ? places.filter(p => p.score > 0).length : boundingBoxPlaces}
+            onChange={(e) => setBoundingBoxPlaces(parseInt(e.target.value))}
+            className="bounding-box-slider"
+          />
+        </div>
+
         {error && (
           <div className="warning-message">
             <small>Advarsel: {error}</small>
@@ -355,6 +402,7 @@ function PlacesVisualizationInner() {
           gradientBuffers={gradientBuffers}
           changedPlaces={changedPlaces}
           animationDuration={ANIMATION_DURATION}
+          boundingBoxPlaces={boundingBoxPlaces}
         />
       </div>
 

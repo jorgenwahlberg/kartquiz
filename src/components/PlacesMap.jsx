@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Popup, Circle, CircleMarker, GeoJSON } from 'r
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
-function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animationDuration }) {
+function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animationDuration, boundingBoxPlaces }) {
   const mapRef = useRef()
   const [renderKey, setRenderKey] = useState(0)
   const [animationProgress, setAnimationProgress] = useState(0)
@@ -61,36 +61,46 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
   }, [changedPlaces, animationDuration])
 
   useEffect(() => {
-    // Fit map bounds to show convex hull or all places
-    if (mapRef.current) {
+    // Fit map bounds to show selected places
+    if (mapRef.current && places && places.length > 0) {
       const map = mapRef.current
 
       try {
-        if (convexHull && convexHull.type === 'Polygon') {
-          // Fit to convex hull
-          const geoJsonLayer = L.geoJSON({
-            type: 'Feature',
-            geometry: convexHull
-          })
-          const bounds = geoJsonLayer.getBounds()
-          if (bounds.isValid()) {
-            console.log('[PlacesMap] Fitting bounds to convex hull')
-            map.fitBounds(bounds, { padding: [100, 100] })
-          }
-        } else if (places && places.length > 0) {
-          // Fit to all places
-          const bounds = L.latLngBounds(
-            places.map(place => [place.coordinates[1], place.coordinates[0]])
+        // Determine which places to use for bounding box
+        let placesForBounds = places
+
+        console.log('[PlacesMap] Bounding box calculation - boundingBoxPlaces:', boundingBoxPlaces, 'total places:', places.length)
+
+        if (boundingBoxPlaces !== null) {
+          // Sort by score descending and take top N
+          const sortedPlaces = [...places].sort((a, b) => b.score - a.score)
+          const topPlaces = sortedPlaces.slice(0, boundingBoxPlaces)
+
+          // Add any changed places (with lightning icon) that aren't already included
+          const changedPlaceNames = new Set(changedPlaces?.map(cp => cp.name) || [])
+          const additionalChangedPlaces = places.filter(p =>
+            changedPlaceNames.has(p.name) && !topPlaces.some(tp => tp.name === p.name)
           )
-          if (bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [50, 50] })
-          }
+
+          placesForBounds = [...topPlaces, ...additionalChangedPlaces]
+          console.log('[PlacesMap] Using top', boundingBoxPlaces, 'places plus', additionalChangedPlaces.length, 'changed places for bounds')
+          console.log('[PlacesMap] Places for bounds:', placesForBounds.map(p => p.name).join(', '))
+        } else {
+          console.log('[PlacesMap] Using all', places.length, 'places for bounds')
+        }
+
+        // Fit to selected places
+        const bounds = L.latLngBounds(
+          placesForBounds.map(place => [place.coordinates[1], place.coordinates[0]])
+        )
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [50, 50], animate: true, duration: 0.5 })
         }
       } catch (error) {
         console.error('[PlacesMap] Error fitting bounds:', error)
       }
     }
-  }, [convexHull, places])
+  }, [places, boundingBoxPlaces, changedPlaces])
 
   useEffect(() => {
     // Force re-render when data changes
@@ -186,9 +196,10 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
         ))}
 
         {/* Render place circles sized by score - using CircleMarker for consistent pixel size */}
-        {places && places.map((place, index) => (
+        {/* Sort by score ascending so highest score (golden) renders last and appears on top */}
+        {places && [...places].sort((a, b) => a.score - b.score).map((place, index) => (
           <CircleMarker
-            key={`place-circle-${index}-${renderKey}`}
+            key={`place-circle-${place.name}-${renderKey}`}
             center={[place.coordinates[1], place.coordinates[0]]}
             radius={getCircleRadiusPixels(place.score)}
             pathOptions={getCircleStyle(place.score)}
