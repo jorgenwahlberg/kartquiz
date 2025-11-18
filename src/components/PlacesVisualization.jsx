@@ -5,6 +5,7 @@ import QuizOverlay from './QuizOverlay'
 import { fetchSheetData, createGradientBuffers, fetchAllQuizQuestions, fetchQuestionByNumber } from '../utils/sheetUtils'
 import { initializeGapi, submitAnswerToSheet, resetAllAnswers } from '../utils/googleAuth'
 import * as turf from '@turf/turf'
+import sverreImage from '../gfx/sverre.jpg'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
 const SHEET_NAME = 'Resultater'
@@ -28,6 +29,7 @@ function PlacesVisualizationInner() {
   const [accessToken, setAccessToken] = useState(null)
   const [gapiReady, setGapiReady] = useState(false)
   const [boundingBoxPlaces, setBoundingBoxPlaces] = useState(null) // null means use all places
+  const [showSplash, setShowSplash] = useState(true)
 
   const loadData = async () => {
     try {
@@ -150,6 +152,12 @@ function PlacesVisualizationInner() {
       const questions = await fetchAllQuizQuestions(SHEET_ID)
       setAllQuestions(questions)
       console.log('[PlacesVisualization] Loaded', questions.length, 'questions')
+
+      // Check if any questions are answered - if so, hide splash screen
+      const hasAnsweredQuestions = questions.some(q => q.isAnswered)
+      if (hasAnsweredQuestions) {
+        setShowSplash(false)
+      }
     } catch (err) {
       console.error('[PlacesVisualization] Error loading quiz questions:', err)
     }
@@ -289,9 +297,19 @@ function PlacesVisualizationInner() {
 
   return (
     <div className="visualization-container">
+      {showSplash && (
+        <div className="splash-screen" onClick={() => setShowSplash(false)}>
+          <div className="splash-content">
+            <h1>Sverres reisequiz!</h1>
+            <img src={sverreImage} alt="Sverre" className="splash-image" />
+            <p className="splash-instruction">Klikk for å starte</p>
+          </div>
+        </div>
+      )}
+
       <div className="control-panel">
         <div className="header">
-          <h1>Kor ska Sverre reis?</h1>
+          <h1>Kor ska vi reis?</h1>
           <p className="description"></p>
         </div>
 
@@ -367,12 +385,6 @@ function PlacesVisualizationInner() {
           )}
         </div>
 
-        <div className="reset-control">
-          <button onClick={handleResetAnswers} className="btn-reset">
-            Start på nytt
-          </button>
-        </div>
-
         <div className="bounding-box-control">
           <label htmlFor="bounding-box-slider">
             Antall steder for kartvisning: {boundingBoxPlaces === null ? places.filter(p => p.score > 0).length : boundingBoxPlaces}
@@ -386,6 +398,12 @@ function PlacesVisualizationInner() {
             onChange={(e) => setBoundingBoxPlaces(parseInt(e.target.value))}
             className="bounding-box-slider"
           />
+        </div>
+
+        <div className="reset-control">
+          <button onClick={handleResetAnswers} className="btn-reset">
+            Start på nytt
+          </button>
         </div>
 
         {error && (
