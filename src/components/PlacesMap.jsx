@@ -21,8 +21,8 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
 
   // Calculate circle radius in meters (for animations only)
   const getCircleRadiusMeters = (score) => {
-    if (score === 0) return 2000 // 2 km for score 0
-    return 2000 + (score * 2000) // Each point adds 2 km
+    if (score === 0) return 5000 // 5 km for score 0 (increased for visibility)
+    return 5000 + (score * 3000) // Each point adds 3 km (increased for visibility)
   }
 
   // Animate changed places - lightning flash effect
@@ -154,10 +154,10 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
       const waveProgress = Math.max(0, (progress - waveDelay) / (1 - waveDelay))
 
       if (waveProgress > 0 && waveProgress < 1) {
-        const expandFactor = 1 + (waveProgress * 5) // Expand to 6x size
+        const expandFactor = 1 + (waveProgress * 8) // Expand to 9x size (increased for visibility)
         waves.push({
           radius: baseRadius * expandFactor,
-          opacity: (1 - waveProgress) * 0.6
+          opacity: (1 - waveProgress) * 0.7 // Slightly more opaque
         })
       }
     }
@@ -188,7 +188,7 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
             }}
             style={{
               fillColor: '#3b82f6',
-              fillOpacity: 0.02,
+              fillOpacity: 0.01,
               color: 'transparent',
               weight: 0
             }}
@@ -248,16 +248,16 @@ function PlacesMap({ places, convexHull, gradientBuffers, changedPlaces, animati
                     />
                   ))}
 
-                  {/* Central lightning flash - smaller pulse */}
+                  {/* Central lightning flash - larger pulse */}
                   <Circle
                     key={`flash-${index}-${renderKey}`}
                     center={[changedPlace.coordinates[1], changedPlace.coordinates[0]]}
-                    radius={baseRadiusMeters * (isNewPlace ? 2.5 : 1.5)} // Bigger for new places
+                    radius={baseRadiusMeters * (isNewPlace ? 4 : 3)} // Bigger for new places (increased for visibility)
                     pathOptions={{
                       fillColor: isNewPlace ? '#fbbf24' : '#ef4444',
-                      fillOpacity: Math.max(0.3, (Math.sin(animationProgress * 10 * Math.PI * 2) * 0.5 + 0.5) * Math.pow(1 - animationProgress, 0.5)),
+                      fillOpacity: Math.max(0.4, (Math.sin(animationProgress * 10 * Math.PI * 2) * 0.5 + 0.5) * Math.pow(1 - animationProgress, 0.5)),
                       color: isNewPlace ? '#f59e0b' : '#dc2626',
-                      weight: isNewPlace ? 5 : 4,
+                      weight: isNewPlace ? 6 : 5, // Thicker border
                       opacity: Math.pow(1 - animationProgress, 0.5) * (isNewPlace ? 1.2 : 1)
                     }}
                   />
