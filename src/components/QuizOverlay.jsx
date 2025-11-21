@@ -11,6 +11,31 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
     setIsSubmitting(false)
   }, [questionData?.number]) // Reset when question number changes
 
+  // Keyboard shortcuts for selecting alternatives (A, B, C, etc.)
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (isSubmitting || !questionData) return
+
+      // Convert key to uppercase
+      const key = event.key.toUpperCase()
+
+      // Check if it's a letter key (A-Z)
+      if (key.length === 1 && key >= 'A' && key <= 'Z') {
+        // Calculate alternative index (A=0, B=1, C=2, etc.)
+        const index = key.charCodeAt(0) - 65
+
+        // Check if this index exists in alternatives
+        if (index >= 0 && index < questionData.alternatives.length) {
+          event.preventDefault()
+          handleAnswerSelect(index)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [isSubmitting, questionData])
+
   if (!questionData) return null
 
   const handleAnswerSelect = async (index) => {
@@ -29,9 +54,13 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
     try {
       // Submit full answer text from alternatives
       const answerText = questionData.alternatives[index]
+
+      // Show selected state briefly (300ms) for visual feedback before closing
+      await new Promise(resolve => setTimeout(resolve, 300))
+
       await onSubmitAnswer(questionData.number, answerText)
 
-      // Close overlay immediately after successful submission
+      // Close overlay after successful submission
       onClose()
     } catch (error) {
       console.error('[QuizOverlay] Error submitting answer:', error)

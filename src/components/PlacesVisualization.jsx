@@ -256,6 +256,24 @@ function PlacesVisualizationInner() {
     }
   }
 
+  // Keyboard shortcut: "n" to open next question in map view
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      // Only trigger if quiz overlay is not showing and not typing in an input/select
+      if (showQuizOverlay || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
+        return
+      }
+
+      if (event.key === 'n' || event.key === 'N') {
+        event.preventDefault()
+        handleOpenQuiz()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [showQuizOverlay, allQuestions]) // Re-attach listener when these change
+
   // Load data on mount and set up refresh interval
   useEffect(() => {
     loadData()
