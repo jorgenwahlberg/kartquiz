@@ -9,6 +9,8 @@ import { initializeGapi, submitAnswerToSheet, resetAllAnswers } from '../utils/g
 import * as turf from '@turf/turf'
 import sverreImage from '../gfx/sverre.jpg'
 import dawnMusic from '../sound/dawn.aac'
+import guriVinnerVideo from '../gfx/guri-vinner.mp4'
+import guriUavgjortVideo from '../gfx/guri-uavgjort.mp4'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
 const SHEET_NAME = 'Resultater'
@@ -321,6 +323,25 @@ function PlacesVisualizationInner() {
     setShowSurprise(false)
   }
 
+  // Determine which video to show based on leading places
+  const getVideoSource = () => {
+    if (!places || places.length === 0) return guriVinnerVideo
+
+    // Filter places with score > 0
+    const scoredPlaces = places.filter(p => p.score > 0)
+    if (scoredPlaces.length === 0) return guriVinnerVideo
+
+    // Find the highest score
+    const maxScore = Math.max(...scoredPlaces.map(p => p.score))
+
+    // Get all places with the highest score
+    const leadingPlaces = scoredPlaces.filter(p => p.score === maxScore)
+
+    // If only one place in first place, use vinner video
+    // If two or more places tied for first, use uavgjort video
+    return leadingPlaces.length === 1 ? guriVinnerVideo : guriUavgjortVideo
+  }
+
   // Handle opening video overlay
   const handleOpenVideo = () => {
     setShowVideo(true)
@@ -573,6 +594,7 @@ function PlacesVisualizationInner() {
         <VideoOverlay
           onContinue={handleContinueFromVideo}
           onClose={handleCloseVideo}
+          videoSrc={getVideoSource()}
         />
       )}
     </div>

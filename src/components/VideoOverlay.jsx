@@ -1,8 +1,7 @@
 import { useEffect } from 'react'
 import './VideoOverlay.css'
-import surpriseVideo from '../gfx/surprise.mov'
 
-function VideoOverlay({ onContinue, onClose }) {
+function VideoOverlay({ onContinue, onClose, videoSrc }) {
   // ESC key to close overlay
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -27,7 +26,7 @@ function VideoOverlay({ onContinue, onClose }) {
         <video
           controls
           className="surprise-video"
-          src={surpriseVideo}
+          src={videoSrc}
         >
           Your browser does not support the video tag.
         </video>
