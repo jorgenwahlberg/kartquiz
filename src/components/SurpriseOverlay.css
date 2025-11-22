@@ -1,0 +1,190 @@
+.surprise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.95);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.surprise-message {
+  text-align: center;
+  z-index: 3001;
+  padding: 2rem;
+  animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.surprise-title {
+  font-size: 4rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 1rem 0;
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.8),
+               0 0 40px rgba(239, 68, 68, 0.6);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.surprise-subtitle {
+  font-size: 2rem;
+  color: #fbbf24;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1rem;
+}
+
+.audio-hint {
+  font-size: 1.2rem;
+  color: white;
+  font-weight: 500;
+  margin: 1rem 0 0 0;
+  animation: pulse 2s ease-in-out infinite;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Close button for surprise overlay */
+.btn-close-surprise {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+  padding: 0;
+  z-index: 3002;
+  backdrop-filter: blur(10px);
+}
+
+.btn-close-surprise:hover {
+  background-color: #ef4444;
+  border-color: #ef4444;
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+}
+
+.surprise-video-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.surprise-video-content {
+  max-width: 900px;
+  width: 100%;
+  background-color: var(--panel-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.video-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1.5rem 0;
+}
+
+.surprise-video {
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  background-color: black;
+  margin-bottom: 1.5rem;
+}
+
+.btn-continue {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-continue:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+}
+
+.btn-continue:active {
+  transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .surprise-title {
+    font-size: 2.5rem;
+  }
+
+  .surprise-subtitle {
+    font-size: 1.5rem;
+  }
+
+  .video-title {
+    font-size: 1.5rem;
+  }
+
+  .surprise-video-content {
+    padding: 1.5rem;
+  }
+
+  .surprise-video {
+    max-height: 50vh;
+  }
+
+  .btn-continue {
+    font-size: 1rem;
+    padding: 0.875rem 2rem;
+  }
+}

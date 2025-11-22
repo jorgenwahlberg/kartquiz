@@ -11,10 +11,19 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
     setIsSubmitting(false)
   }, [questionData?.number]) // Reset when question number changes
 
-  // Keyboard shortcuts for selecting alternatives (A, B, C, etc.)
+  // Keyboard shortcuts for selecting alternatives (A, B, C, etc.) and ESC to close
   useEffect(() => {
     const handleKeyPress = (event) => {
-      if (isSubmitting || !questionData) return
+      if (!questionData) return
+
+      // ESC key to close overlay
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+
+      if (isSubmitting) return
 
       // Convert key to uppercase
       const key = event.key.toUpperCase()
@@ -34,7 +43,7 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [isSubmitting, questionData])
+  }, [isSubmitting, questionData, onClose])
 
   if (!questionData) return null
 

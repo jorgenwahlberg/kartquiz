@@ -2,10 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
 import PlacesMap from './PlacesMap'
 import QuizOverlay from './QuizOverlay'
+import SurpriseOverlay from './SurpriseOverlay'
+import VideoOverlay from './VideoOverlay'
 import { fetchSheetData, createGradientBuffers, fetchAllQuizQuestions, fetchQuestionByNumber } from '../utils/sheetUtils'
 import { initializeGapi, submitAnswerToSheet, resetAllAnswers } from '../utils/googleAuth'
 import * as turf from '@turf/turf'
 import sverreImage from '../gfx/sverre.jpg'
+import dawnMusic from '../sound/dawn.aac'
 
 const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
 const SHEET_NAME = 'Resultater'
@@ -30,6 +33,41 @@ function PlacesVisualizationInner() {
   const [gapiReady, setGapiReady] = useState(false)
   const [boundingBoxPlaces, setBoundingBoxPlaces] = useState(null) // null means use all places
   const [showSplash, setShowSplash] = useState(true)
+  const [showSurprise, setShowSurprise] = useState(false)
+  const [surpriseShown, setSurpriseShown] = useState(false) // Track if surprise has been shown
+  const [showVideo, setShowVideo] = useState(false)
+  const splashAudioRef = useRef(null)
+
+  // Play splash screen music
+  useEffect(() => {
+    if (showSplash) {
+      // Create and play audio when splash is shown
+      if (!splashAudioRef.current) {
+        splashAudioRef.current = new Audio(dawnMusic)
+        splashAudioRef.current.volume = 0.6
+        splashAudioRef.current.loop = false
+      }
+
+      // Try to play (may be blocked by browser)
+      splashAudioRef.current.play().catch(err => {
+        console.log('[PlacesVisualization] Splash audio autoplay blocked:', err)
+      })
+    } else {
+      // Stop and clean up audio when splash is hidden
+      if (splashAudioRef.current) {
+        splashAudioRef.current.pause()
+        splashAudioRef.current.currentTime = 0
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (splashAudioRef.current) {
+        splashAudioRef.current.pause()
+        splashAudioRef.current = null
+      }
+    }
+  }, [showSplash])
 
   const loadData = async () => {
     try {
@@ -189,13 +227,32 @@ function PlacesVisualizationInner() {
   }
 
   // Close quiz overlay and refresh data
-  const handleCloseQuiz = () => {
+  const handleCloseQuiz = async () => {
     setShowQuizOverlay(false)
     setActiveQuestion(null)
+
     // Reload map data and questions immediately
-    loadData()
-    loadAllQuestions()
+    await loadData()
+    await loadAllQuestions()
+
+    // After reloading, check if we should show the surprise
+    // (This will be checked in a useEffect after allQuestions is updated)
   }
+
+  // Check if we should show the surprise (after second-to-last question is answered)
+  useEffect(() => {
+    if (allQuestions.length === 0 || surpriseShown) return
+
+    const answeredCount = allQuestions.filter(q => q.isAnswered).length
+    const totalQuestions = allQuestions.length
+
+    // Show surprise if exactly the second-to-last question was just answered
+    if (answeredCount === totalQuestions - 1 && !surpriseShown) {
+      console.log('[PlacesVisualization] Second-to-last question answered! Showing surprise...')
+      setShowSurprise(true)
+      setSurpriseShown(true)
+    }
+  }, [allQuestions, surpriseShown])
 
   // Initialize Google API client on mount
   useEffect(() => {
@@ -249,6 +306,9 @@ function PlacesVisualizationInner() {
       // Reload data and questions to reflect changes
       await loadData()
       await loadAllQuestions()
+      // Reset surprise state
+      setSurpriseShown(false)
+      setShowSurprise(false)
       alert('Alle svar er nullstilt!')
     } catch (error) {
       console.error('[PlacesVisualization] Error resetting answers:', error)
@@ -256,11 +316,37 @@ function PlacesVisualizationInner() {
     }
   }
 
+  // Handle closing surprise (confetti) - just goes back to map view
+  const handleContinueFromSurprise = () => {
+    setShowSurprise(false)
+  }
+
+  // Handle opening video overlay
+  const handleOpenVideo = () => {
+    setShowVideo(true)
+  }
+
+  // Handle closing video overlay
+  const handleCloseVideo = () => {
+    setShowVideo(false)
+  }
+
+  // Handle continuing from video to last question
+  const handleContinueFromVideo = () => {
+    setShowVideo(false)
+    // Open the last (unanswered) question
+    const lastQuestion = allQuestions.find(q => !q.isAnswered)
+    if (lastQuestion) {
+      setActiveQuestion(lastQuestion)
+      setShowQuizOverlay(true)
+    }
+  }
+
   // Keyboard shortcut: "n" to open next question in map view
   useEffect(() => {
     const handleKeyPress = (event) => {
-      // Only trigger if quiz overlay is not showing and not typing in an input/select
-      if (showQuizOverlay || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
+      // Only trigger if quiz overlay, surprise, and video are not showing and not typing in an input/select
+      if (showQuizOverlay || showSurprise || showVideo || event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
         return
       }
 
@@ -272,7 +358,7 @@ function PlacesVisualizationInner() {
 
     window.addEventListener('keydown', handleKeyPress)
     return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [showQuizOverlay, allQuestions]) // Re-attach listener when these change
+  }, [showQuizOverlay, showSurprise, showVideo, allQuestions]) // Re-attach listener when these change
 
   // Load data on mount and set up refresh interval
   useEffect(() => {
@@ -313,10 +399,21 @@ function PlacesVisualizationInner() {
     )
   }
 
+  // Handle splash screen click - play audio and close
+  const handleSplashClick = () => {
+    // Try to play audio if blocked by autoplay
+    if (splashAudioRef.current && splashAudioRef.current.paused) {
+      splashAudioRef.current.play().catch(err => {
+        console.log('[PlacesVisualization] Could not play splash audio:', err)
+      })
+    }
+    setShowSplash(false)
+  }
+
   return (
     <div className="visualization-container">
       {showSplash && (
-        <div className="splash-screen" onClick={() => setShowSplash(false)}>
+        <div className="splash-screen" onClick={handleSplashClick}>
           <div className="splash-content">
             <h1>Sverres reisequiz!</h1>
             <img src={sverreImage} alt="Sverre" className="splash-image" />
@@ -332,6 +429,12 @@ function PlacesVisualizationInner() {
         </div>
 
         <div className="quiz-controls">
+          {!accessToken && (
+            <button onClick={() => login()} className="btn-login">
+              🔐 Logg inn med Google
+            </button>
+          )}
+
           <button onClick={handleOpenQuiz} className="btn-quiz">
             📝 Spørsmål {getNextUnansweredQuestion()?.number || '✓'}
           </button>
@@ -353,6 +456,13 @@ function PlacesVisualizationInner() {
                 ))}
               </select>
             </div>
+          )}
+
+          {/* Show video button if confetti has been shown and only 1 question left */}
+          {surpriseShown && allQuestions.filter(q => !q.isAnswered).length === 1 && (
+            <button onClick={handleOpenVideo} className="btn-video">
+              🎬 Se videoen!
+            </button>
           )}
         </div>
 
@@ -449,6 +559,20 @@ function PlacesVisualizationInner() {
           isAuthenticated={!!accessToken}
           onSignIn={() => login()}
           onClose={handleCloseQuiz}
+        />
+      )}
+
+      {showSurprise && (
+        <SurpriseOverlay
+          onContinue={handleContinueFromSurprise}
+          places={places}
+        />
+      )}
+
+      {showVideo && (
+        <VideoOverlay
+          onContinue={handleContinueFromVideo}
+          onClose={handleCloseVideo}
         />
       )}
     </div>
