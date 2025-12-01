@@ -1,0 +1,740 @@
+[
+  {
+    "number": "1",
+    "question": "Hva slags historisk periode fascinerer deg mest?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🧙 Myter og legender – tåke, tårn og tvilsomme naboer.",
+        "points": 1,
+        "places": ["Transilvania", "Timbuktu", "Murmansk"]
+      },
+      {
+        "letter": "b",
+        "text": "🏺 Romertiden – akvedukter, keisere og god organisering.",
+        "points": 1,
+        "places": ["Piemonte", "Rheinhessen"]
+      },
+      {
+        "letter": "c",
+        "text": "🕍 Renessansen – kunst, symmetri og litt for mange engler.",
+        "points": 1,
+        "places": ["Piemonte", "Praha", "Wien"]
+      },
+      {
+        "letter": "d",
+        "text": "🏰 Middelalderen – rustninger, borger og menn med fjær i hatten.",
+        "points": 1,
+        "places": ["Edinburgh", "Sør-England", "Rheinhessen", "Alsace", "Normandie"]
+      },
+      {
+        "letter": "e",
+        "text": "🪖 1900-tallets dramatikk – heltemot, gjenoppbygging og store historier.",
+        "points": 1,
+        "places": ["Warszawa", "Budapest", "Normandie"]
+      }
+    ]
+  },
+  {
+    "number": "2",
+    "question": "Nå er du 50 – hvor eventyrlysten er du egentlig?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "😌 Jeg liker vin, wifi og forutsigbarhet.",
+        "points": 1,
+        "places": ["Wien", "Alsace", "Rheinhessen"]
+      },
+      {
+        "letter": "b",
+        "text": "😏 Litt varierende standard går fint, så lenge det skyldes at stedet har en spennende historie.",
+        "points": 1,
+        "places": ["Praha", "Normandie", "Warszawa", "Edinburgh", "Budapest"]
+      },
+      {
+        "letter": "c",
+        "text": "😱 Jeg vil kunne si «vi DRO faktisk dit» med blandet stolthet og sjokk.",
+        "points": 1,
+        "places": ["Murmansk", "Timbuktu", "Transilvania"]
+      },
+      {
+        "letter": "d",
+        "text": "🌱 Jeg foretrekker steder der lokalbefolkningen er så stolte av landskapet sitt...",
+        "points": 1,
+        "places": ["Piemonte", "Sør-England"]
+      }
+    ]
+  },
+  {
+    "number": "3",
+    "question": "Du skal utfordre drikkepreferansene dine. Hva prøver du?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🍷 Lokale rødviner du kan uttale halvveis riktig.",
+        "points": 1,
+        "places": ["Piemonte"]
+      },
+      {
+        "letter": "b",
+        "text": "🍏 Cider eller hvitvin på en gresskledd skråning.",
+        "points": 1,
+        "places": ["Normandie", "Alsace", "Rheinhessen", "Wien"]
+      },
+      {
+        "letter": "c",
+        "text": "🍸 Noe som brenner på vei ned, men gir selvtillit på vei opp.",
+        "points": 1,
+        "places": ["Budapest", "Warszawa", "Murmansk", "Edinburgh"]
+      },
+      {
+        "letter": "d",
+        "text": "🧃 En lokal spesialitet med overraskende effekt.",
+        "points": 1,
+        "places": ["Transilvania", "Timbuktu"]
+      },
+      {
+        "letter": "e",
+        "text": "🍺 Et glass du ikke helt vet om er laget for hånd eller av tilfeldigheter.",
+        "points": 1,
+        "places": ["Praha", "Sør-England"]
+      }
+    ]
+  },
+  {
+    "number": "4",
+    "question": "Du får en gratis omvisning – hva sier du ja til?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🧠 Et museum med kart, motorer eller militærhistorie.",
+        "points": 1,
+        "places": ["Warszawa", "Budapest", "Normandie"]
+      },
+      {
+        "letter": "b",
+        "text": "🍇 En vinkjeller med lave tak og høy stemning.",
+        "points": 1,
+        "places": ["Piemonte", "Alsace", "Rheinhessen"]
+      },
+      {
+        "letter": "c",
+        "text": "🏰 En borg med vind og vindeltrapp.",
+        "points": 1,
+        "places": ["Edinburgh", "Sør-England", "Normandie"]
+      },
+      {
+        "letter": "d",
+        "text": "🧊 Et sted der guiden begynner med \"her overlevde bare to av ti\".",
+        "points": 1,
+        "places": ["Murmansk", "Transilvania"]
+      },
+      {
+        "letter": "e",
+        "text": "📜 En samling med eldgamle manuskripter og mer støv enn mennesker.",
+        "points": 1,
+        "places": ["Wien", "Praha", "Timbuktu"]
+      }
+    ]
+  },
+  {
+    "number": "5",
+    "question": "Hvilken europeisk «regel» håndterer du best på tur?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🧀 At enkelte regioner har lover som beskytter oster...",
+        "points": 1,
+        "places": ["Normandie", "Piemonte", "Alsace"]
+      },
+      {
+        "letter": "b",
+        "text": "🛤 At tog kan gå nøyaktig på minutten – eller være 27 minutter forsinket...",
+        "points": 1,
+        "places": ["Wien", "Praha", "Rheinhessen"]
+      },
+      {
+        "letter": "c",
+        "text": "🪧 At noen byer har historiske soner der du ikke får spise, sitte eller peke...",
+        "points": 1,
+        "places": ["Edinburgh", "Warszawa", "Budapest"]
+      },
+      {
+        "letter": "d",
+        "text": "🧃 At lokal drikke er så \"tradisjonelt\" at det finnes regler...",
+        "points": 1,
+        "places": ["Transilvania", "Murmansk"]
+      },
+      {
+        "letter": "e",
+        "text": "🏺 At gamle steder må bevares så nøye at du må gå i sikksakk...",
+        "points": 1,
+        "places": ["Sør-England", "Timbuktu"]
+      }
+    ]
+  },
+  {
+    "number": "6",
+    "question": "Du blir invitert til lokal festival – du takker ja til:",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🎻 Kunst og kultur og folk som nikker anerkjennende.",
+        "points": 1,
+        "places": ["Wien", "Praha", "Edinburgh"]
+      },
+      {
+        "letter": "b",
+        "text": "🥁 En lokal parade med mer entusiasme enn koreografi.",
+        "points": 1,
+        "places": ["Budapest", "Warszawa", "Murmansk"]
+      },
+      {
+        "letter": "c",
+        "text": "🔥 Kveldslys, myter og litt for mye symbolikk.",
+        "points": 1,
+        "places": ["Transilvania", "Timbuktu"]
+      },
+      {
+        "letter": "d",
+        "text": "🍷 Folkefest med vin, mat og dans du later som du kan.",
+        "points": 1,
+        "places": ["Alsace", "Piemonte", "Rheinhessen"]
+      },
+      {
+        "letter": "e",
+        "text": "☂️ Markedsdag med rare varer og sjarm i regnvær.",
+        "points": 1,
+        "places": ["Sør-England", "Normandie"]
+      }
+    ]
+  },
+  {
+    "number": "7",
+    "question": "Hvilken type historisk maktperson fascinerer deg mest?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "👑 En keiser, konge eller hersker som levde omgitt av pomp og prakt...",
+        "points": 1,
+        "places": ["Wien", "Edinburgh", "Sør-England"]
+      },
+      {
+        "letter": "b",
+        "text": "📜 En general, motstandshelt eller leder som tok skjebnevalg...",
+        "points": 1,
+        "places": ["Normandie", "Warszawa", "Budapest"]
+      },
+      {
+        "letter": "c",
+        "text": "🎩 En politisk reformator eller diplomat som bygde opp en by...",
+        "points": 1,
+        "places": ["Praha", "Warszawa"]
+      },
+      {
+        "letter": "d",
+        "text": "🍷 En jordeier, vinbaron eller lokalpatriot som styrte regionen...",
+        "points": 1,
+        "places": ["Piemonte", "Alsace", "Rheinhessen"]
+      },
+      {
+        "letter": "e",
+        "text": "🧛‍♂️ En figur hvis legende er større enn livet...",
+        "points": 1,
+        "places": ["Transilvania", "Timbuktu", "Murmansk"]
+      }
+    ]
+  },
+  {
+    "number": "8",
+    "question": "Hvilken av disse fiktive Dag Solstad-romanene har du mest lyst til å lese?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🍁 «Om mine forsøk på å forstå Europas dannelse...»",
+        "points": 1,
+        "places": ["Wien", "Praha", "Edinburgh"]
+      },
+      {
+        "letter": "b",
+        "text": "⛈️ «Beretning om en mann som forsøkte å ta en beslutning...»",
+        "points": 1,
+        "places": ["Normandie", "Sør-England", "Edinburgh", "Transilvania", "Murmansk"]
+      },
+      {
+        "letter": "c",
+        "text": "🥃 «Notater fra et opphold blant mennesker som snakket om drikke...»",
+        "points": 1,
+        "places": ["Rheinhessen", "Alsace", "Piemonte"]
+      },
+      {
+        "letter": "d",
+        "text": "♨️ «Den trykkende varmen og de tankene som grep meg i august»",
+        "points": 1,
+        "places": ["Budapest", "Timbuktu"]
+      },
+      {
+        "letter": "e",
+        "text": "🏩 «En stillferdig opptegnelse fra et hotellrom...»",
+        "points": 1,
+        "places": ["Warszawa"]
+      }
+    ]
+  },
+  {
+    "number": "9",
+    "question": "Hvordan avsluttes en perfekt dag?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🧩 Med at gjengen plutselig prøver å løse et \"lokalt mysterium\"...",
+        "points": 1,
+        "places": ["Alsace", "Murmansk"]
+      },
+      {
+        "letter": "b",
+        "text": "🧃 Med en \"rolig kveld\" som ender med at du blir medlem...",
+        "points": 1,
+        "places": ["Rheinhessen", "Transilvania"]
+      },
+      {
+        "letter": "c",
+        "text": "🔦 Med at dere tar en omvei fordi en dør stod på gløtt...",
+        "points": 1,
+        "places": ["Timbuktu", "Budapest", "Normandie"]
+      },
+      {
+        "letter": "d",
+        "text": "🎼 Med en minikonsert der ingen vet om musikerne er...",
+        "points": 1,
+        "places": ["Wien", "Praha", "Warszawa"]
+      },
+      {
+        "letter": "e",
+        "text": "🍰 Med en spontan dessert-maraton...",
+        "points": 1,
+        "places": ["Piemonte", "Sør-England", "Edinburgh"]
+      }
+    ]
+  },
+  {
+    "number": "10",
+    "question": "Hva slags mat får deg mest i feriemodus?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🦴 Noe du ikke helt vet hva er, men later som du liker.",
+        "points": 1,
+        "places": ["Transilvania", "Timbuktu", "Murmansk"]
+      },
+      {
+        "letter": "b",
+        "text": "🧀 Ost, brød og noe godt i glasset.",
+        "points": 1,
+        "places": ["Alsace", "Piemonte"]
+      },
+      {
+        "letter": "c",
+        "text": "🥧 Bakst og comfort food du ikke burde spise til middag.",
+        "points": 1,
+        "places": ["Sør-England", "Edinburgh"]
+      },
+      {
+        "letter": "d",
+        "text": "🍲 Mat du skjønner, men som likevel overrasker.",
+        "points": 1,
+        "places": ["Wien", "Warszawa", "Praha"]
+      },
+      {
+        "letter": "e",
+        "text": "🍖 Noe rustikt, mettende og tradisjonsrikt.",
+        "points": 1,
+        "places": ["Normandie", "Budapest", "Rheinhessen"]
+      }
+    ]
+  },
+  {
+    "number": "11",
+    "question": "Hva slags lyd vil du våkne til?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "⛪️ Kirkeklokker som insisterer på at du står opp tidligere...",
+        "points": 1,
+        "places": ["Praha", "Alsace", "Sør-England", "Wien", "Normandie"]
+      },
+      {
+        "letter": "b",
+        "text": "🌫️ En mystisk lyd du håper er vinden...",
+        "points": 1,
+        "places": ["Transilvania", "Murmansk", "Timbuktu"]
+      },
+      {
+        "letter": "c",
+        "text": "🐦 Fugler som synger som om de har vært våkne siden 04:00...",
+        "points": 1,
+        "places": ["Piemonte", "Sør-England", "Normandie", "Rheinhessen"]
+      },
+      {
+        "letter": "d",
+        "text": "☕️ En by som sakte våkner: kaffekopper, små prat...",
+        "points": 1,
+        "places": ["Wien", "Warszawa", "Budapest", "Edinburgh"]
+      }
+    ]
+  },
+  {
+    "number": "12",
+    "question": "Hva slags politisk historie synes du er mest inspirerende?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🧱 Steder som ble ødelagt, reist opp igjen...",
+        "points": 1,
+        "places": ["Warszawa", "Budapest"]
+      },
+      {
+        "letter": "b",
+        "text": "🏛️ Steder der ting ble avgjort i saler med fresker...",
+        "points": 1,
+        "places": ["Wien", "Edinburgh", "Praha"]
+      },
+      {
+        "letter": "c",
+        "text": "🍇 Gamle territorier, vinruter, små intrigemøter...",
+        "points": 1,
+        "places": ["Piemonte", "Alsace", "Rheinhessen", "Sør-England", "Normandie"]
+      },
+      {
+        "letter": "d",
+        "text": "🌍 Historier der makt, handel og kultur skjedde langt fra hovedstrømmene...",
+        "points": 1,
+        "places": ["Timbuktu", "Murmansk", "Transilvania"]
+      }
+    ]
+  },
+  {
+    "number": "13",
+    "question": "Du får en dag alene – hva gjør du?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🏛️ Går på et museum du egentlig ikke hadde planlagt...",
+        "points": 1,
+        "places": ["Wien", "Praha", "Edinburgh", "Sør-England"]
+      },
+      {
+        "letter": "b",
+        "text": "🍷 Rusler gjennom vinmarker i rolig tempo...",
+        "points": 1,
+        "places": ["Piemonte", "Alsace", "Rheinhessen"]
+      },
+      {
+        "letter": "c",
+        "text": "☕️ Setter deg på en kafé med en bok, ser på folk...",
+        "points": 1,
+        "places": ["Wien", "Budapest", "Praha", "Edinburgh"]
+      },
+      {
+        "letter": "d",
+        "text": "🏰 Tar en rolig tur til en borg eller ruin...",
+        "points": 1,
+        "places": ["Transilvania", "Murmansk", "Normandie", "Timbuktu"]
+      }
+    ]
+  },
+  {
+    "number": "14",
+    "question": "Hvilken transportmetode passer deg best?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🌌 Et transportmiddel du ikke helt forstår, men som kommer frem.",
+        "points": 1,
+        "places": ["Murmansk", "Transilvania", "Timbuktu"]
+      },
+      {
+        "letter": "b",
+        "text": "🚶 En vandretur med små historier og store omveier.",
+        "points": 1,
+        "places": ["Edinburgh", "Normandie", "Piemonte", "Sør-England"]
+      },
+      {
+        "letter": "c",
+        "text": "🚋 En trikk som egentlig er sightseeing.",
+        "points": 1,
+        "places": ["Praha", "Warszawa", "Wien", "Budapest"]
+      },
+      {
+        "letter": "d",
+        "text": "⛴️ En elvetur med utsikt som gjør deg helt stille.",
+        "points": 1,
+        "places": ["Alsace", "Budapest", "Rheinhessen"]
+      }
+    ]
+  },
+  {
+    "number": "15",
+    "question": "Du blir invitert til å prøve en aktivitet lokalbefolkningen elsker – hva velger du?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🥏 Lokal bueskyting eller øksekast...",
+        "points": 1,
+        "places": ["Edinburgh", "Sør-England", "Normandie"]
+      },
+      {
+        "letter": "b",
+        "text": "🧭 En \"autentisk\" utendørsaktivitet som guiden beskriver som helt trygg...",
+        "points": 1,
+        "places": ["Murmansk", "Transilvania", "Timbuktu"]
+      },
+      {
+        "letter": "c",
+        "text": "🧘 Et \"rolig\" morgenstrekk i en park...",
+        "points": 1,
+        "places": ["Wien", "Budapest"]
+      },
+      {
+        "letter": "d",
+        "text": "🥾 En guidet \"kosevandring\" som plutselig blir tre kilometer lenger...",
+        "points": 1,
+        "places": ["Alsace", "Rheinhessen", "Warszawa", "Piemonte"]
+      }
+    ]
+  },
+  {
+    "number": "16",
+    "question": "Hvilken gavekortopplevelse velger du?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🏰 \"Hemmelig historievandring\" – du får hodelykt, nøkkelknippe...",
+        "points": 1,
+        "places": ["Edinburgh", "Normandie", "Praha"]
+      },
+      {
+        "letter": "b",
+        "text": "🍇 \"Ustrukturert vinsmaking\" – ingen vet hvilken vin som kommer neste...",
+        "points": 1,
+        "places": ["Piemonte", "Alsace", "Rheinhessen"]
+      },
+      {
+        "letter": "c",
+        "text": "♨️ \"Bad & Briller\"-pakken – spa, varme basseng...",
+        "points": 1,
+        "places": ["Budapest", "Wien"]
+      },
+      {
+        "letter": "d",
+        "text": "🧭 \"Ekspedisjon light\" – du følger en rute som ser dramatisk ut...",
+        "points": 1,
+        "places": ["Murmansk", "Timbuktu", "Transilvania"]
+      },
+      {
+        "letter": "e",
+        "text": "🎒 \"Oppdragsdagen\" – du får et hefte med små, milde utfordringer...",
+        "points": 1,
+        "places": ["Sør-England", "Warszawa"]
+      }
+    ]
+  },
+  {
+    "number": "17",
+    "question": "Du ender på en liten, lokal fest. Hva slags gjest vil du helst havne på bord sammen med?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "☂️ Den typen gjest som stadig sier \"jeg skal bare på toalettet\"...",
+        "points": 1,
+        "places": ["Normandie", "Sør-England", "Edinburgh", "Transilvania"]
+      },
+      {
+        "letter": "b",
+        "text": "⏰ Den som ankommer presist, har med seg en gave...",
+        "points": 1,
+        "places": ["Wien", "Alsace", "Praha", "Piemonte"]
+      },
+      {
+        "letter": "c",
+        "text": "💨 Den som kommer inn døren som en varm vind...",
+        "points": 1,
+        "places": ["Budapest", "Timbuktu"]
+      },
+      {
+        "letter": "d",
+        "text": "🤨 Den som står i et hjørne, ser litt alvorlig ut...",
+        "points": 1,
+        "places": ["Murmansk", "Warszawa"]
+      },
+      {
+        "letter": "e",
+        "text": "🕶️ Den som kommer inn med solbriller, et vinglass...",
+        "points": 1,
+        "places": ["Rheinhessen"]
+      }
+    ]
+  },
+  {
+    "number": "18",
+    "question": "Hvilken av disse doktorgradsavhandlingene i statsvitenskap skulle du ønske eksisterte?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "📒 «Symbolsk orden og urbane autoritets­praksis­er...»",
+        "points": 1,
+        "places": ["Wien", "Praha", "Edinburgh"]
+      },
+      {
+        "letter": "b",
+        "text": "📗 «Administrativ robusthet i klimavariable lokalsamfunn...»",
+        "points": 1,
+        "places": ["Normandie", "Sør-England", "Transilvania", "Murmansk"]
+      },
+      {
+        "letter": "c",
+        "text": "📙 «Lokale preferanser og politisk stabilitet...»",
+        "points": 1,
+        "places": ["Rheinhessen", "Alsace", "Piemonte"]
+      },
+      {
+        "letter": "d",
+        "text": "📕 «Temperatur, tempo og beslutningstaking...»",
+        "points": 1,
+        "places": ["Budapest", "Timbuktu"]
+      },
+      {
+        "letter": "e",
+        "text": "📘 «Urban tyngde og politiske narrativer...»",
+        "points": 1,
+        "places": ["Warszawa"]
+      }
+    ]
+  },
+  {
+    "number": "19",
+    "question": "Hvilken \"litt skuffende, men helt harmløs\" severdighet ender du opp med å besøke?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "🏷️ Et museum viet én eneste gjenstand.",
+        "points": 1,
+        "places": ["Wien", "Warszawa"]
+      },
+      {
+        "letter": "b",
+        "text": "🧱 En middelaldervegg som \"kanskje er ekte\"...",
+        "points": 1,
+        "places": ["Edinburgh", "Normandie", "Sør-England"]
+      },
+      {
+        "letter": "c",
+        "text": "🖼️ En permanent fotoutstilling med kun svart-hvitt-bilder.",
+        "points": 1,
+        "places": ["Budapest", "Praha"]
+      },
+      {
+        "letter": "d",
+        "text": "🥾 En stein med plakett som hevder at \"noe viktig kanskje skjedde her\".",
+        "points": 1,
+        "places": ["Alsace", "Piemonte", "Rheinhessen"]
+      },
+      {
+        "letter": "e",
+        "text": "🪨 Et naturfenomen som loves som spektakulært, men egentlig er… greit",
+        "points": 1,
+        "places": ["Transilvania", "Murmansk", "Timbuktu"]
+      }
+    ]
+  },
+  {
+    "number": "20",
+    "question": "Du kan gi tre poeng til ett av stedene. Hvilket?",
+    "alternatives": [
+      {
+        "letter": "a",
+        "text": "Dere har gjort en fantastisk jobb med å finne ut hva jeg vil.",
+        "points": 0,
+        "places": []
+      },
+      {
+        "letter": "b",
+        "text": "Normandie",
+        "points": 3,
+        "places": ["Normandie"]
+      },
+      {
+        "letter": "c",
+        "text": "Rheinhessen",
+        "points": 3,
+        "places": ["Rheinhessen"]
+      },
+      {
+        "letter": "d",
+        "text": "Alsace",
+        "points": 3,
+        "places": ["Alsace"]
+      },
+      {
+        "letter": "e",
+        "text": "Sør-England",
+        "points": 3,
+        "places": ["Sør-England"]
+      },
+      {
+        "letter": "f",
+        "text": "Edinburgh",
+        "points": 3,
+        "places": ["Edinburgh"]
+      },
+      {
+        "letter": "g",
+        "text": "Wien",
+        "points": 3,
+        "places": ["Wien"]
+      },
+      {
+        "letter": "h",
+        "text": "Praha",
+        "points": 3,
+        "places": ["Praha"]
+      },
+      {
+        "letter": "i",
+        "text": "Warszawa",
+        "points": 3,
+        "places": ["Warszawa"]
+      },
+      {
+        "letter": "j",
+        "text": "Budapest",
+        "points": 3,
+        "places": ["Budapest"]
+      },
+      {
+        "letter": "k",
+        "text": "Piemonte",
+        "points": 3,
+        "places": ["Piemonte"]
+      },
+      {
+        "letter": "l",
+        "text": "Transilvania",
+        "points": 3,
+        "places": ["Transilvania"]
+      },
+      {
+        "letter": "m",
+        "text": "Murmansk",
+        "points": 3,
+        "places": ["Murmansk"]
+      },
+      {
+        "letter": "n",
+        "text": "Timbuktu",
+        "points": 3,
+        "places": ["Timbuktu"]
+      }
+    ]
+  }
+]
