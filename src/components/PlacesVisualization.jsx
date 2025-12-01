@@ -1,25 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google'
 import PlacesMap from './PlacesMap'
 import QuizOverlay from './QuizOverlay'
 import SurpriseOverlay from './SurpriseOverlay'
 import VideoOverlay from './VideoOverlay'
-import { fetchSheetData, createGradientBuffers, fetchAllQuizQuestions, fetchQuestionByNumber } from '../utils/sheetUtils'
-import { initializeGapi, submitAnswerToSheet, resetAllAnswers } from '../utils/googleAuth'
+import { createGradientBuffers } from '../utils/sheetUtils'
+import { calculateScores } from '../utils/scoreCalculator'
+import { saveAnswer, clearAllAnswers, isAnswered, getAnsweredCount } from '../utils/answerStorage'
+import questionsData from '../data/questions.json'
 import * as turf from '@turf/turf'
 import sverreImage from '../gfx/sverre.jpg'
 import dawnMusic from '../sound/dawn.aac'
 import guriVinnerVideo from '../gfx/guri-vinner.mp4'
 import guriUavgjortVideo from '../gfx/guri-uavgjort.mp4'
 
-const SHEET_ID = '10SnSQIjUFzHz0zXi1TbXbescLkO4ZYqRXJncA7VROZI'
-const SHEET_NAME = 'Resultater'
-const REFRESH_INTERVAL = 10000 // 10 seconds
 const GRADIENT_WIDTH = 250 // km - configurable gradient width
 const ANIMATION_DURATION = 10000 // ms - duration of change animation
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
-function PlacesVisualizationInner() {
+function PlacesVisualization() {
   const [places, setPlaces] = useState([])
   const previousPlacesRef = useRef([]) // Use ref to avoid closure issues
   const [changedPlaces, setChangedPlaces] = useState([])
@@ -28,11 +25,9 @@ function PlacesVisualizationInner() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdate, setLastUpdate] = useState(null)
-  const [allQuestions, setAllQuestions] = useState([])
+  const [allQuestions, setAllQuestions] = useState(questionsData)
   const [activeQuestion, setActiveQuestion] = useState(null)
   const [showQuizOverlay, setShowQuizOverlay] = useState(false)
-  const [accessToken, setAccessToken] = useState(null)
-  const [gapiReady, setGapiReady] = useState(false)
   const [boundingBoxPlaces, setBoundingBoxPlaces] = useState(null) // null means use all places
   const [showSplash, setShowSplash] = useState(true)
   const [showSurprise, setShowSurprise] = useState(false)
@@ -71,13 +66,13 @@ function PlacesVisualizationInner() {
     }
   }, [showSplash])
 
-  const loadData = async () => {
+  const loadData = () => {
     try {
       setLoading(true)
       setError(null)
 
-      console.log('[PlacesVisualization] Fetching data...')
-      const data = await fetchSheetData(SHEET_ID, SHEET_NAME)
+      console.log('[PlacesVisualization] Calculating scores from localStorage...')
+      const data = calculateScores()
 
       console.log('[PlacesVisualization] Loaded places:', data.length)
       console.log('[PlacesVisualization] Previous places count:', previousPlacesRef.current.length)
@@ -187,25 +182,19 @@ function PlacesVisualizationInner() {
     }
   }
 
-  const loadAllQuestions = async () => {
-    try {
-      const questions = await fetchAllQuizQuestions(SHEET_ID)
-      setAllQuestions(questions)
-      console.log('[PlacesVisualization] Loaded', questions.length, 'questions')
-
-      // Check if any questions are answered - if so, hide splash screen
-      const hasAnsweredQuestions = questions.some(q => q.isAnswered)
-      if (hasAnsweredQuestions) {
-        setShowSplash(false)
-      }
-    } catch (err) {
-      console.error('[PlacesVisualization] Error loading quiz questions:', err)
+  const loadAllQuestions = () => {
+    // Questions are loaded from local JSON
+    // Check if any questions are answered - if so, hide splash screen
+    const hasAnsweredQuestions = getAnsweredCount() > 0
+    if (hasAnsweredQuestions) {
+      setShowSplash(false)
     }
+    console.log('[PlacesVisualization] Questions loaded from local JSON:', questionsData.length)
   }
 
   // Find next unanswered question
   const getNextUnansweredQuestion = () => {
-    return allQuestions.find(q => !q.isAnswered) || null
+    return allQuestions.find(q => !isAnswered(q.number)) || null
   }
 
   // Open quiz with next unanswered question
@@ -229,23 +218,24 @@ function PlacesVisualizationInner() {
   }
 
   // Close quiz overlay and refresh data
-  const handleCloseQuiz = async () => {
+  const handleCloseQuiz = () => {
     setShowQuizOverlay(false)
     setActiveQuestion(null)
 
     // Reload map data and questions immediately
-    await loadData()
-    await loadAllQuestions()
+    loadData()
+    loadAllQuestions()
 
     // After reloading, check if we should show the surprise
     // (This will be checked in a useEffect after allQuestions is updated)
   }
 
   // Check if we should show the surprise (after second-to-last question is answered)
+  // Runs on places update since that changes when answers are saved
   useEffect(() => {
     if (allQuestions.length === 0 || surpriseShown) return
 
-    const answeredCount = allQuestions.filter(q => q.isAnswered).length
+    const answeredCount = getAnsweredCount()
     const totalQuestions = allQuestions.length
 
     // Show surprise if exactly the second-to-last question was just answered
@@ -254,49 +244,19 @@ function PlacesVisualizationInner() {
       setShowSurprise(true)
       setSurpriseShown(true)
     }
-  }, [allQuestions, surpriseShown])
-
-  // Initialize Google API client on mount
-  useEffect(() => {
-    initializeGapi(() => {
-      console.log('[PlacesVisualization] GAPI initialized')
-      setGapiReady(true)
-    })
-  }, [])
-
-  // Google OAuth login
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      console.log('[PlacesVisualization] OAuth login successful')
-      setAccessToken(tokenResponse.access_token)
-    },
-    onError: (error) => {
-      console.error('[PlacesVisualization] OAuth login failed:', error)
-      alert('Kunne ikke logge inn. Prøv igjen.')
-    },
-    scope: 'https://www.googleapis.com/auth/spreadsheets'
-  })
+  }, [places, allQuestions, surpriseShown])
 
   // Handle answer submission
-  const handleSubmitAnswer = async (questionNumber, answer) => {
-    if (!accessToken || !gapiReady) {
-      throw new Error('Not authenticated or GAPI not ready')
-    }
+  const handleSubmitAnswer = (questionNumber, answerLetter) => {
+    console.log('[PlacesVisualization] Submitting answer:', answerLetter, 'for question:', questionNumber)
+    saveAnswer(questionNumber, answerLetter)
 
-    console.log('[PlacesVisualization] Submitting answer:', answer, 'for question:', questionNumber)
-    await submitAnswerToSheet(SHEET_ID, questionNumber, answer, accessToken)
-
-    // Reload questions to update answer status
-    await loadAllQuestions()
+    // Reload data to update scores
+    loadData()
   }
 
   // Handle reset answers
-  const handleResetAnswers = async () => {
-    if (!accessToken || !gapiReady) {
-      alert('Du må logge inn først for å nullstille svar.')
-      return
-    }
-
+  const handleResetAnswers = () => {
     const confirmed = window.confirm('Er du sikker på at du vil nullstille alle svar? Dette kan ikke angres.')
     if (!confirmed) {
       return
@@ -304,10 +264,10 @@ function PlacesVisualizationInner() {
 
     try {
       console.log('[PlacesVisualization] Resetting all answers')
-      await resetAllAnswers(SHEET_ID, accessToken)
-      // Reload data and questions to reflect changes
-      await loadData()
-      await loadAllQuestions()
+      clearAllAnswers()
+      // Reload data to reflect changes
+      loadData()
+      loadAllQuestions()
       // Reset surprise state
       setSurpriseShown(false)
       setShowSurprise(false)
@@ -356,7 +316,7 @@ function PlacesVisualizationInner() {
   const handleContinueFromVideo = () => {
     setShowVideo(false)
     // Open the last (unanswered) question
-    const lastQuestion = allQuestions.find(q => !q.isAnswered)
+    const lastQuestion = allQuestions.find(q => !isAnswered(q.number))
     if (lastQuestion) {
       setActiveQuestion(lastQuestion)
       setShowQuizOverlay(true)
@@ -381,18 +341,10 @@ function PlacesVisualizationInner() {
     return () => window.removeEventListener('keydown', handleKeyPress)
   }, [showQuizOverlay, showSurprise, showVideo, allQuestions]) // Re-attach listener when these change
 
-  // Load data on mount and set up refresh interval
+  // Load data on mount
   useEffect(() => {
     loadData()
     loadAllQuestions()
-
-    const interval = setInterval(() => {
-      console.log('[PlacesVisualization] Auto-refreshing data...')
-      loadData()
-      loadAllQuestions()
-    }, REFRESH_INTERVAL)
-
-    return () => clearInterval(interval)
   }, [])
 
   if (loading && places.length === 0) {
@@ -450,12 +402,6 @@ function PlacesVisualizationInner() {
         </div>
 
         <div className="quiz-controls">
-          {!accessToken && (
-            <button onClick={() => login()} className="btn-login">
-              🔐 Logg inn med Google
-            </button>
-          )}
-
           <button onClick={handleOpenQuiz} className="btn-quiz">
             📝 Spørsmål {getNextUnansweredQuestion()?.number || '✓'}
           </button>
@@ -472,7 +418,7 @@ function PlacesVisualizationInner() {
                 {allQuestions.map((q) => (
                   <option key={q.number} value={q.number}>
                     {q.number}. {q.question.substring(0, 50)}{q.question.length > 50 ? '...' : ''}
-                    {q.isAnswered ? ' ✓' : ''}
+                    {isAnswered(q.number) ? ' ✓' : ''}
                   </option>
                 ))}
               </select>
@@ -480,7 +426,7 @@ function PlacesVisualizationInner() {
           )}
 
           {/* Show video button if confetti has been shown and only 1 question left */}
-          {surpriseShown && allQuestions.filter(q => !q.isAnswered).length === 1 && (
+          {surpriseShown && allQuestions.filter(q => !isAnswered(q.number)).length === 1 && (
             <button onClick={handleOpenVideo} className="btn-video">
               🎬 Se videoen!
             </button>
@@ -577,8 +523,6 @@ function PlacesVisualizationInner() {
         <QuizOverlay
           questionData={activeQuestion}
           onSubmitAnswer={handleSubmitAnswer}
-          isAuthenticated={!!accessToken}
-          onSignIn={() => login()}
           onClose={handleCloseQuiz}
         />
       )}
@@ -598,14 +542,6 @@ function PlacesVisualizationInner() {
         />
       )}
     </div>
-  )
-}
-
-function PlacesVisualization() {
-  return (
-    <GoogleOAuthProvider clientId={CLIENT_ID}>
-      <PlacesVisualizationInner />
-    </GoogleOAuthProvider>
   )
 }
 

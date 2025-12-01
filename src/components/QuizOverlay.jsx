@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './QuizOverlay.css'
 
-function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, onClose }) {
+function QuizOverlay({ questionData, onSubmitAnswer, onClose }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -30,13 +30,12 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
 
       // Check if it's a letter key (A-Z)
       if (key.length === 1 && key >= 'A' && key <= 'Z') {
-        // Calculate alternative index (A=0, B=1, C=2, etc.)
-        const index = key.charCodeAt(0) - 65
+        // Find alternative with matching letter
+        const alternative = questionData.alternatives.find(alt => alt.letter.toUpperCase() === key)
 
-        // Check if this index exists in alternatives
-        if (index >= 0 && index < questionData.alternatives.length) {
+        if (alternative) {
           event.preventDefault()
-          handleAnswerSelect(index)
+          handleAnswerSelect(alternative.letter)
         }
       }
     }
@@ -47,27 +46,17 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
 
   if (!questionData) return null
 
-  const handleAnswerSelect = async (index) => {
+  const handleAnswerSelect = async (answerLetter) => {
     if (isSubmitting) return
 
-    if (!isAuthenticated) {
-      // User needs to sign in first
-      alert('Vennligst logg inn med Google for å svare')
-      onSignIn()
-      return
-    }
-
-    setSelectedAnswer(index)
+    setSelectedAnswer(answerLetter)
     setIsSubmitting(true)
 
     try {
-      // Submit full answer text from alternatives
-      const answerText = questionData.alternatives[index]
-
       // Show selected state briefly (300ms) for visual feedback before closing
       await new Promise(resolve => setTimeout(resolve, 300))
 
-      await onSubmitAnswer(questionData.number, answerText)
+      onSubmitAnswer(questionData.number, answerLetter)
 
       // Close overlay after successful submission
       onClose()
@@ -86,15 +75,6 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
           ✕
         </button>
 
-        {!isAuthenticated && (
-          <div className="auth-warning">
-            <p>⚠️ Du må logge inn med Google for å svare</p>
-            <button onClick={onSignIn} className="btn-signin">
-              Logg inn med Google
-            </button>
-          </div>
-        )}
-
         <div className="quiz-question-number">
           Spørsmål {questionData.number}
         </div>
@@ -104,20 +84,20 @@ function QuizOverlay({ questionData, onSubmitAnswer, isAuthenticated, onSignIn, 
         </h2>
 
         <div className="quiz-alternatives">
-          {questionData.alternatives.map((alternative, index) => (
+          {questionData.alternatives.map((alternative) => (
             <div
-              key={index}
-              className={`quiz-alternative ${selectedAnswer === index ? 'selected' : ''} ${isSubmitting ? 'disabled' : ''}`}
-              onClick={() => handleAnswerSelect(index)}
-              style={{ cursor: isAuthenticated && !isSubmitting ? 'pointer' : 'not-allowed' }}
+              key={alternative.letter}
+              className={`quiz-alternative ${selectedAnswer === alternative.letter ? 'selected' : ''} ${isSubmitting ? 'disabled' : ''}`}
+              onClick={() => handleAnswerSelect(alternative.letter)}
+              style={{ cursor: !isSubmitting ? 'pointer' : 'not-allowed' }}
             >
               <span className="alternative-letter">
-                {String.fromCharCode(65 + index)}
+                {alternative.letter.toUpperCase()}
               </span>
               <span className="alternative-text">
-                {alternative}
+                {alternative.text}
               </span>
-              {selectedAnswer === index && <span className="checkmark">✓</span>}
+              {selectedAnswer === alternative.letter && <span className="checkmark">✓</span>}
             </div>
           ))}
         </div>
